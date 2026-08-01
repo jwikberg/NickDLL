@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
-extern vector<DWORD> state_leagues;
-extern vector<DWORD> state_lower;
+extern std::vector<DWORD> state_leagues;
+extern std::vector<DWORD> state_lower;

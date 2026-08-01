@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include "config.h"
+#include "Config.h"
 #include "Helpers\Helper.h"
 #include "NString.h"
 

@@ -6,7 +6,7 @@
 #include <fstream>
 
 map<string, char*> clubs_rename_short = {
-	{"SJK Sein‰joki II", "SJK Akatemia"},
+	{"SJK Sein√§joki II", "SJK Akatemia"},
 };
 
 map<string, char*> clubs_rename_long = {
@@ -15,14 +15,14 @@ map<string, char*> clubs_rename_long = {
 	{"Miami Fusion FC", "Inter Miami CF"},
 	{"NY/NJ Metrostars", "New York Red Bulls"},
 	{"Tampa Bay Mutiny", "Los Angeles FC"},
-	{"Clube AtlÈtico Paranaense", "Club Athletico Paranaense"},
+	{"Clube Atl√©tico Paranaense", "Club Athletico Paranaense"},
 	{"Baskonia C.D.", "CD Basconia"},
 	{"Extremadura C.F.", "CD Extremadura"},
 	{"Merthyr Tydfil", "Merthyr Town"},
 	//{"AZ", "AZ Alkmaar"},
 	{"Bor. M'gladbach Amateure", "Borussia M'gladbach II"},
-	{"SJK Sein‰joki II", "SJK Sein‰joki Akatemia"},
-	{"AssociaÁ„o Lusitano de …vora 1911", "Lusitano de …vora GC"},
+	{"SJK Sein√§joki II", "SJK Sein√§joki Akatemia"},
+	{"Associa√ß√£o Lusitano de √âvora 1911", "Lusitano de √âvora GC"},
 };
 
 map<string, DWORD> club_dword_match;
@@ -77,10 +77,7 @@ extern "C" _declspec(naked) int inject_club_names()
 	_asm
 	{
 		pushad
-	}
-	inject_club_names_full();
-	_asm
-	{
+		call inject_club_names_full
 		popad
 		ret
 	}
@@ -863,10 +860,7 @@ extern "C" _declspec(naked) int check_9cf_c()
 	_asm
 	{
 		pushad
-	}
-	check_9cf();
-	_asm
-	{
+		call check_9cf
 		popad
 		pop edi
 		pop esi

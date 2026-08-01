@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "bra_state_league_list.h"
 
-vector<DWORD> state_leagues = {};
-vector<DWORD> state_lower = {};
+std::vector<DWORD> state_leagues = {};
+std::vector<DWORD> state_lower = {};

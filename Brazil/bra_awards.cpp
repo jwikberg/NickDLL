@@ -2,7 +2,7 @@
 #include "Structures\CMHeader.h"
 #include "Helpers\generic_functions.h"
 #include <Helpers\9cf_constants.h>
-#include "bra_state_league_list.cpp"
+#include "bra_state_league_list.h"
 
 void brazil_awards(BYTE* _this, int a2) {
 	DWORD edi = *(DWORD*)(_this + 0x13);
@@ -161,7 +161,7 @@ void brazil_awards(BYTE* _this, int a2) {
 	yearly_person_award_setup_92FE80(pMem, edi, i, BRA_GAUCHO_BEST_GOALKEEPER_9CF(), 3000, 0, BRA_GAUCHO_STATE_9CF(), 0, 0, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;
 
-	// Goiás awards
+	// Goiï¿½s awards
 	pMem = (BYTE*)cm0102_new(0x25D);
 	team_award_setup_8AF520(pMem, edi, i, BRA_GOIAS_TEAM_OF_WEEK_9CF(), 500, 0, BRA_GOIAS_STATE_9CF(), 1, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;
@@ -229,7 +229,7 @@ void brazil_awards(BYTE* _this, int a2) {
 	yearly_person_award_setup_92FE80(pMem, edi, i, BRA_NORTH_BEST_GOALKEEPER_9CF(), 3000, 0, BRA_NORTH_STATE_9CF(), 0, 0, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;
 
-	// Paraná awards
+	// Paranï¿½ awards
 	pMem = (BYTE*)cm0102_new(0x25D);
 	team_award_setup_8AF520(pMem, edi, i, BRA_PARANA_TEAM_OF_WEEK_9CF(), 500, 0, BRA_PARANA_STATE_9CF(), 1, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;
@@ -246,7 +246,7 @@ void brazil_awards(BYTE* _this, int a2) {
 	yearly_person_award_setup_92FE80(pMem, edi, i, BRA_PARANA_BEST_GOALKEEPER_9CF(), 3000, 0, BRA_PARANA_STATE_9CF(), 0, 0, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;
 
-	// São Paulo awards
+	// Sï¿½o Paulo awards
 	pMem = (BYTE*)cm0102_new(0x25D);
 	team_award_setup_8AF520(pMem, edi, i, BRA_SAO_PAULO_TEAM_OF_WEEK_9CF(), 500, 0, BRA_SAO_PAULO_STATE_9CF(), 1, 0, a2, 1);
 	awards_list[i++] = (DWORD)pMem;

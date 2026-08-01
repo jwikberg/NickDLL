@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 #include <Structures\CMHeader.h>
 #include <Helpers\generic_functions.h>
 #include <Helpers\9cf_constants.h>
@@ -620,10 +620,7 @@ extern "C" _declspec(naked) void inject_league_restructure_init()
 	_asm
 	{
 		pushad
-	}
-	league_restructure_init();
-	_asm
-	{
+		call league_restructure_init
 		popad
 		push 0x82838e
 		push 0x524d70

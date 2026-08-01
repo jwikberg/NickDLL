@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
 #include "Structures\CMHeader.h"
 #include "Helper.h"
 #include "Structures\Date.h"

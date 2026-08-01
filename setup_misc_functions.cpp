@@ -86,7 +86,7 @@ int show_extra_leagues_in_start(BYTE* nation, DWORD dest_ptr, int a3) {
 		return 1;
 	}
 	if (cm3_nation->NationID == NATION_SPAIN_9CF()) {
-		league_str = "Segunda Federación";
+		league_str = "Segunda FederaciÃ³n";
 		sub_66F4E0(dest_ptr, (DWORD)&league_str[0]);
 		return 1;
 	}
@@ -796,10 +796,7 @@ extern "C" _declspec(naked) void player_gain_nationality_c()
 	_asm
 	{
 		pushad
-	}
-	player_gain_nationality();
-	_asm
-	{
+		call player_gain_nationality
 		popad
 		push 0x8c5cd5
 		ret
@@ -1437,7 +1434,7 @@ void setup_misc_functions()
 
 	// Show hosts for some other comps
 	WriteDWORD(0x96769C, 0x404480); // Asian Cup
-	WriteDWORD(0x96B488, 0x404480); // Copa América
+	WriteDWORD(0x96B488, 0x404480); // Copa AmÃ©rica
 	WriteDWORD(0x9672F8, 0x404480); // AFCON
 
 	// Fixes a slight bug where B-teams can't qualify for relegation playoffs if they have the "CantBePromoted" flag set

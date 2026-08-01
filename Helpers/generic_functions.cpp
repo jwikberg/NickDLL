@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 #include "generic_functions.h"
 #include "Structures\CMHeader.h"
 #include "Helper.h"
