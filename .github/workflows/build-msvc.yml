@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      VERSION_MAJOR: 1
+      VERSION_MINOR: 0
 
     steps:
       - name: Checkout
@@ -14,11 +17,37 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v3
 
+      - name: Compute version
+        id: version
+        shell: pwsh
+        run: |
+          $patch = "${{ github.run_number }}"
+          $version = "$env:VERSION_MAJOR.$env:VERSION_MINOR.$patch"
+
+          if ("${{ github.ref_name }}" -ne "master") {
+            $version = "$version-prerelease"
+          }
+
+          $fileVersion = "$env:VERSION_MAJOR.$env:VERSION_MINOR.$patch.0"
+
+          "PATCH_VERSION=$patch" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FILE_VERSION=$fileVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
       - name: Build
-        run: msbuild NickDLL.vcxproj /p:Configuration=Release /p:Platform=Win32 /m
+        shell: pwsh
+        run: |
+          msbuild NickDLL.vcxproj `
+            /p:Configuration=Release `
+            /p:Platform=Win32 `
+            /p:Version=$env:VERSION `
+            /p:ProductVersion=$env:VERSION `
+            /p:FileVersion=$env:FILE_VERSION `
+            /m
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: NickDLL
+          name: NickDLL-${{ steps.version.outputs.version }}
           path: Release/NickDLL.dll
