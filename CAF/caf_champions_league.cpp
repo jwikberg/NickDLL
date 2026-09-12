@@ -7,7 +7,7 @@
 #include "Helpers\Helper.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 using namespace std;
 
@@ -16,7 +16,6 @@ vtable* caf_champions_league_vtable = new vtable((BYTE*)0x967574, 0xA0);
 void caf_champions_league_free_under(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	data->comp_vtable = (DWORD*)(caf_champions_league_vtable->vtable_ptr);
-	DWORD x = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
 	}
@@ -51,7 +50,6 @@ void caf_champions_league_free_under(BYTE* _this) {
 		sub_49F450((BYTE*)(data->f8));
 		sub_944C94_free((BYTE*)(data->f8));
 	}
-	DWORD y = -1;
 	sub_518690(_this);
 }
 
@@ -90,11 +88,11 @@ DWORD caf_champions_league_fixtures(BYTE* _this, char stage_idx, WORD* num_round
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 6, 28), year, Wednesday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 9, 20), year, Saturday);
-		FillFixtureDetails(pMem, fixture_id++, FirstQualifyingPhase, 0, NoTiebreak_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 64, 32, 64, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qr1_lose"));
+		FillFixtureDetails(pMem, fixture_id++, FirstQualifyingPhase, 0, NoTiebreak, Penalties, 8, 64, 32, 64, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qr1_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 9, 28), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 10, 18), year, Saturday);
-		FillFixtureDetails(pMem, fixture_id++, SecondQualifyingPhase, 0, NoTiebreak_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 32, 16, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qr2_lose"));
+		FillFixtureDetails(pMem, fixture_id++, SecondQualifyingPhase, 0, NoTiebreak, Penalties, 8, 32, 16, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qr2_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -141,15 +139,15 @@ DWORD caf_champions_league_fixtures(BYTE* _this, char stage_idx, WORD* num_round
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year + 1, 2, 16), year, Monday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year + 1, 3, 14), year, Saturday);
-		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, FixedTeamOrderInCup + NoTiebreak_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 8, 4, 8, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qtr_lose"));
+		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, FixedTeamOrderInCup | NoTiebreak, Penalties, 8, 8, 4, 8, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_qtr_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year + 1, 3, 22), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year + 1, 4, 11), year, Saturday);
-		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, FixedTeamOrderInCup + NoTiebreak_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 4, 2, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_semi_lose"));
+		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, FixedTeamOrderInCup | NoTiebreak, Penalties, 8, 4, 2, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("caf_cl_semi_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year + 1, 4, 19), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year + 1, 5, 15), year, Friday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, Final, 0, NoTiebreak_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 2, 1, 0, 0, 0, 2, 9, 0, prizeMoneyFile.GetInt("caf_cl_final_win"), prizeMoneyFile.GetInt("caf_cl_final_lose"));
+		FillFixtureDetails(pMem, fixture_id++, Final, 0, NoTiebreak, Penalties, 8, 2, 1, 0, 0, 0, 2, 9, 0, prizeMoneyFile.GetInt("caf_cl_final_win"), prizeMoneyFile.GetInt("caf_cl_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -206,11 +204,12 @@ void caf_cl_team_selection() {
 	vector<DWORD> top12_ids = caf_top_12_nations();
 	vector<DWORD> bottom6_ids = caf_bottom_6_nations();
 	for (cm3_nations* caf_nation : caf_nations) {
+		if (is_nation_non_fifa(caf_nation)) continue;
 		BYTE count = 1;
 		if (find(top12_ids.begin(), top12_ids.end(), caf_nation->NationID) != top12_ids.end()) {
 			count = 2;
 		}
-		else if (excluded_count < 3 && find(bottom6_ids.begin(), bottom6_ids.end(), caf_nation->NationID) != bottom6_ids.end()) {
+		else if (excluded_count < 2 && find(bottom6_ids.begin(), bottom6_ids.end(), caf_nation->NationID) != bottom6_ids.end()) {
 			excluded_count++;
 			continue;
 		}
@@ -307,7 +306,7 @@ void caf_champions_league_all_teams(BYTE* _this) {
 		if (club->ClubEuroFlag == CAF_CHAMPIONS_LEAGUE_9CF()) {
 			BYTE seed = club->ClubEuroSeeding;
 			teams[teams_r1].club = club;
-			teams[teams_r1].f5 = 0;
+			teams[teams_r1].seeding = 9;
 			teams[teams_r1].f6 = 0;
 			teams_r1++;
 		}
@@ -328,7 +327,7 @@ void caf_champions_league_qualifier_teams(BYTE* _this) {
 	DWORD total_count = data->special_nteams_seedings;
 	for (WORD i = 0; i < total_count; i++) {
 		teams[i].club = qualifiers[i].club;
-		teams[i].f5 = 0;
+		teams[i].seeding = 0;
 		teams[i].f6 = 0;
 	}
 }
@@ -427,7 +426,6 @@ void __declspec(naked) caf_champions_league_reputation_calc_c()
 
 char caf_champions_league_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
@@ -496,8 +494,8 @@ void caf_champions_league_group_stage_setup(BYTE* _this) {
 	comp_stats* comp_data = (comp_stats*)_this;
 	DWORD* stages_arr = comp_data->stages;
 
-	BYTE prom_rel[4] = { 2, 0, 0, 0 };
-	BYTE tiebreaks[4] = { CurrentPositionTiebreaker, GoalDifferenceTiebreaker, GoalsForTiebreaker, GoalsForAwayTiebreaker };
+	char prom_rel[4] = { 2, 0, 0, 0 };
+	char tiebreaks[4] = { CurrentPositionTiebreaker, GoalDifferenceTiebreaker, GoalsForTiebreaker, GoalsForAwayTiebreaker };
 
 	vector<cm3_clubs*> clubs;
 	teams_seeded* teams = (teams_seeded*)comp_data->special_teams_seedings;
@@ -580,6 +578,8 @@ void caf_champions_league_final_stage_setup(BYTE* _this) {
 	DWORD* stages_arr = comp_data->stages;
 	*((DWORD*)(&stages_arr[stage_num])) = (DWORD)new_stage;
 	sub_51C800(new_stage, 0);
+	sub_9452CA_free(pTeams);
+	sub_9452CA_free(pFixtures);
 	comp_data->current_stage = (long)stage_num;
 
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
@@ -628,7 +628,7 @@ void __declspec(naked) caf_champions_league_stages_create_c()
 	}
 }
 
-int caf_champions_league_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int caf_champions_league_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
 	if (stage == -1) {
@@ -688,7 +688,7 @@ int caf_champions_league_set_fates(BYTE* _this, cm3_clubs* club, char fate, char
 	return 0;
 }
 
-void __declspec(naked) caf_champions_league_set_table_fate()
+void __declspec(naked) caf_champions_league_table_fates_c()
 {
 	__asm
 	{
@@ -700,7 +700,7 @@ void __declspec(naked) caf_champions_league_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call caf_champions_league_set_fates
+		call caf_champions_league_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -782,7 +782,7 @@ void caf_champions_league_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	caf_champions_league_vtable->SetPointer(VTableSetChampion, (DWORD)&caf_champions_league_set_champion_c);
 	caf_champions_league_vtable->SetPointer(VTableClubLandmarks, 0x48cab0);
 	caf_champions_league_vtable->SetPointer(VTableFixtures, (DWORD)&caf_champions_league_fixture_caller);
-	caf_champions_league_vtable->SetPointer(VTableTableFates, (DWORD)&caf_champions_league_set_table_fate);
+	caf_champions_league_vtable->SetPointer(VTableTableFates, (DWORD)&caf_champions_league_table_fates_c);
 	caf_champions_league_vtable->SetPointer(VTableStageNews, (DWORD)&caf_cl_stage_news_c);
 	caf_champions_league_vtable->SetPointer(VTableReputationSetup, (DWORD)&caf_champions_league_reputation_setup_c);
 	caf_champions_league_vtable->SetPointer(VTableReputationCalc, (DWORD)&caf_champions_league_reputation_calc_c);
@@ -792,9 +792,9 @@ void caf_champions_league_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	data->promotes_to = -1;
 	data->relegates_to = -1;
 	data->f82 = 3;
-	data->max_bench = 7;
-	data->max_subs = 3;
-	data->rules = RulesAsia;
+	data->max_bench = 9;
+	data->max_subs = 5;
+	data->rules = RulesAfrica;
 	data->f81 = 0xa;
 	*((BYTE*)(_this + 0xB1)) = 0;
 	int loaded = sub_51FC00(_this, 1);
@@ -810,9 +810,7 @@ void caf_champions_league_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	*((DWORD*)(_this + 0xA3)) = (DWORD)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0x3c, _this + 0x3a, 0);
 	cup_map_fixture_tree_518790(_this);
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	caf_champions_league_reputation_setup(_this);
 }

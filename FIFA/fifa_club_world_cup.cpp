@@ -7,7 +7,7 @@
 #include "Helpers\Helper.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 using namespace std;
 
@@ -16,7 +16,6 @@ vtable* fifa_club_world_cup_vtable = new vtable((BYTE*)0x968BF4, 0xB4);
 void fifa_club_world_cup_free_under(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	data->comp_vtable = (DWORD*)(fifa_club_world_cup_vtable->vtable_ptr);
-	DWORD x = 0;
 	sub_687970(_this, 0);
 	if (data->fixtures_table) {
 		sub_9452CA_free(data->fixtures_table);
@@ -41,7 +40,6 @@ void fifa_club_world_cup_free_under(BYTE* _this) {
 		sub_49F450((BYTE*)(data->f8));
 		sub_944C94_free((BYTE*)(data->f8));
 	}
-	DWORD y = -1;
 	sub_682300(_this);
 }
 
@@ -91,7 +89,7 @@ void fifa_club_world_cup_subs(BYTE* _this)
 	comp_data->n_rounds = 1;
 	comp_data->pts_for_win = 3;
 	comp_data->pts_for_draw = 1;
-	comp_data->f196 = 23;
+	comp_data->f196 = 8;
 	comp_data->comp_type = CLUB_INTERNATIONAL;
 	comp_data->tiebreaker_1 = CurrentPositionTiebreaker;
 	comp_data->tiebreaker_2 = GoalDifferenceTiebreaker;
@@ -107,10 +105,10 @@ void fifa_club_world_cup_subs(BYTE* _this)
 	comp_data->relegates_to = -1;
 
 	comp_data->f217 = 0x28;
-	comp_data->max_bench = 7;
-	comp_data->max_subs = 3;
+	comp_data->max_bench = 9;
+	comp_data->max_subs = 5;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 3, January, comp_data->year, -1);
 	*((WORD*)(_this + 0xB6)) = *(WORD*)(cm_date);
 
@@ -280,7 +278,7 @@ DWORD fifa_club_world_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_rounds
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Monday, Morning, LargestStadium6);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Sunday, Morning, LargestStadium3);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Saturday, Morning, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 0, FixedTeamOrderInCup2 + ExtraTimePenalties_1, NoTiebreak_2, 23, 16, 8, 16, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_r16_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 0, FixedTeamOrderInCup2 | Penalties | ExtraTime, NoTiebreak, 8, 16, 8, 16, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_r16_qualify"));
 		tv_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 7, 2), year, Wednesday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 7, 4), year, Friday, Afternoon, VenueUnknown_1);
@@ -289,18 +287,18 @@ DWORD fifa_club_world_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_rounds
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Saturday, Morning, LargestStadium3);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Friday, Morning, LargestStadium5);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++);
-		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, FixedTeamOrderInCup2 + ExtraTimePenalties_1, NoTiebreak_2, 23, 8, 4, 0, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_qtr_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, FixedTeamOrderInCup2 | Penalties | ExtraTime, NoTiebreak, 8, 8, 4, 0, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_qtr_qualify"));
 		tv_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 7, 6), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 7, 8), year, Tuesday, Afternoon, VenueUnknown_1);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Wednesday, Afternoon, LargestStadium2);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++, 3, Tuesday, Afternoon, LargestStadium1);
 		AddPlayoffTVFixture(pMem, fixture_id, tv_id++);
-		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, FixedTeamOrderInCup2 + ExtraTimePenalties_1, NoTiebreak_2, 23, 4, 2, 0, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_semi_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, FixedTeamOrderInCup2 | Penalties | ExtraTime, NoTiebreak, 8, 4, 2, 0, 0, 0, 1, 0, prizeMoneyFile.GetInt("fifa_cwc_semi_qualify"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 7, 10), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 7, 13), year, Sunday, Afternoon, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, Final, 0, ExtraTimePenalties_1, NoTiebreak_2, 23, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("fifa_cwc_final_win"), prizeMoneyFile.GetInt("fifa_cwc_final_lose"));
+		FillFixtureDetails(pMem, fixture_id++, Final, 0, Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("fifa_cwc_final_win"), prizeMoneyFile.GetInt("fifa_cwc_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -409,6 +407,31 @@ void __declspec(naked) fifa_club_world_cup_reputation_calc_c()
 	}
 }
 
+void cwc_add_club(cm3_clubs* club, vector<cm3_clubs*>& club_list, map<DWORD, int>& count_map) {
+	if (!club) return;
+	if (vector_contains_element(club_list, club)) return;
+	club_list.push_back(club);
+	if (count_map.find(club->ClubNation->NationID) == count_map.end()) {
+		count_map[club->ClubNation->NationID] = 1;
+	}
+	else {
+		int count = count_map[club->ClubNation->NationID];
+		count_map[club->ClubNation->NationID] = count + 1;
+	}
+}
+
+bool cwc_try_add_club(cm3_clubs* club, vector<cm3_clubs*>& club_list, map<DWORD, int>& count_map) {
+	if (!club) return false;
+	if (vector_contains_element(club_list, club)) return false;
+	if (count_map.find(club->ClubNation->NationID) == count_map.end()) {
+		count_map[club->ClubNation->NationID] = 0;
+	}
+	int count = count_map[club->ClubNation->NationID];
+	if (count >= 2) return false;
+	cwc_add_club(club, club_list, count_map);
+	return true;
+}
+
 void fifa_club_world_cup_all_teams(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	WORD year = data->year;
@@ -421,6 +444,7 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	BYTE* pMem = (BYTE*)cm0102_malloc(6 * total_teams_in_comp);
 	data->special_teams_seedings = (DWORD*)pMem;
 	teams_seeded* teams = (teams_seeded*)data->special_teams_seedings;
+	map<DWORD, int> counts;
 
 	// Get teams for Club World Cup
 	// AFC (4)
@@ -428,11 +452,11 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	vector<cm3_clubs*> afc_clubs;
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(AFC_CHAMPIONS_LEAGUE_ELITE_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(afc_clubs, winner)) afc_clubs.push_back(winner);
+		cwc_add_club(winner, afc_clubs, counts);
 	}
 	for (int i = 0; i < 4 && afc_clubs.size() < 4; i++) {
 		cm3_clubs* runner_up = get_last_comp_runner_up_by_year(get_comp(AFC_CHAMPIONS_LEAGUE_ELITE_9CF()), year - i - 1);
-		if (runner_up && !vector_contains_element(afc_clubs, runner_up)) afc_clubs.push_back(runner_up);
+		cwc_try_add_club(runner_up, afc_clubs, counts);
 	}
 	vector<cm3_clubs*> high_rep_clubs = find_clubs_of_continent(ASIA_9CF());
 	sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
@@ -440,18 +464,18 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	while (afc_clubs.size() < 4)
 	{
 		cm3_clubs* backup = high_rep_clubs[backup_count++];
-		if (!vector_contains_element(afc_clubs, backup)) afc_clubs.push_back(backup);
+		cwc_try_add_club(backup, afc_clubs, counts);
 	}
 	// CAF (4)
 	// - last 4 winners of CAF CL, get runner-ups as backup
 	vector<cm3_clubs*> caf_clubs;
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(CAF_CHAMPIONS_LEAGUE_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(caf_clubs, winner)) caf_clubs.push_back(winner);
+		cwc_add_club(winner, caf_clubs, counts);
 	}
 	for (int i = 0; i < 4 && caf_clubs.size() < 4; i++) {
 		cm3_clubs* runner_up = get_last_comp_runner_up_by_year(get_comp(CAF_CHAMPIONS_LEAGUE_9CF()), year - i - 1);
-		if (runner_up && !vector_contains_element(caf_clubs, runner_up)) caf_clubs.push_back(runner_up);
+		cwc_try_add_club(runner_up, caf_clubs, counts);
 	}
 	high_rep_clubs = find_clubs_of_continent(AFRICA_9CF());
 	sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
@@ -459,18 +483,18 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	while (caf_clubs.size() < 4)
 	{
 		cm3_clubs* backup = high_rep_clubs[backup_count++];
-		if (!vector_contains_element(caf_clubs, backup)) caf_clubs.push_back(backup);
+		cwc_try_add_club(backup, caf_clubs, counts);
 	}
 	// CONCACAF (4)
 	// - last 4 winners of CONCACAF CL, get runner-ups as backup
 	vector<cm3_clubs*> concacaf_clubs;
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(CONCACAF_CHAMPIONS_CUP_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(concacaf_clubs, winner)) concacaf_clubs.push_back(winner);
+		cwc_add_club(winner, concacaf_clubs, counts);
 	}
 	for (int i = 0; i < 4 && concacaf_clubs.size() < 4; i++) {
 		cm3_clubs* runner_up = get_last_comp_runner_up_by_year(get_comp(CONCACAF_CHAMPIONS_CUP_9CF()), year - i - 1);
-		if (runner_up && !vector_contains_element(concacaf_clubs, runner_up)) concacaf_clubs.push_back(runner_up);
+		cwc_try_add_club(runner_up, concacaf_clubs, counts);
 	}
 	high_rep_clubs = find_clubs_of_continent(NORTH_AMERICA_9CF());
 	sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
@@ -478,18 +502,18 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	while (concacaf_clubs.size() < 4)
 	{
 		cm3_clubs* backup = high_rep_clubs[backup_count++];
-		if (!vector_contains_element(concacaf_clubs, backup)) concacaf_clubs.push_back(backup);
+		cwc_try_add_club(backup, concacaf_clubs, counts);
 	}
 	// CONMEBOL (6)
 	// - last 4 winners of Libertadores, get runner-ups as backup
 	vector<cm3_clubs*> conmebol_clubs;
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(COPA_LIBERTADORES_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(conmebol_clubs, winner)) conmebol_clubs.push_back(winner);
+		cwc_add_club(winner, conmebol_clubs, counts);
 	}
 	for (int i = 0; i < 4 && conmebol_clubs.size() < 6; i++) {
 		cm3_clubs* runner_up = get_last_comp_runner_up_by_year(get_comp(COPA_LIBERTADORES_9CF()), year - i - 1);
-		if (runner_up && !vector_contains_element(conmebol_clubs, runner_up)) conmebol_clubs.push_back(runner_up);
+		cwc_try_add_club(runner_up, conmebol_clubs, counts);
 	}
 	high_rep_clubs = find_clubs_of_continent(SOUTH_AMERICA_9CF());
 	sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
@@ -497,7 +521,7 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	while (conmebol_clubs.size() < 6)
 	{
 		cm3_clubs* backup = high_rep_clubs[backup_count++];
-		if (!vector_contains_element(conmebol_clubs, backup)) conmebol_clubs.push_back(backup);
+		cwc_try_add_club(backup, conmebol_clubs, counts);
 	}
 	// OFC (1)
 	// - last winner of OFC CL
@@ -505,20 +529,25 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	for (int i = 0; i < 4 && !ofc_club; i++) {
 		ofc_club = get_last_comp_winner_by_year(get_comp(OFC_CHAMPIONS_LEAGUE_9CF()), year - i - 1);
 	}
+	if (!ofc_club) {
+		high_rep_clubs = find_clubs_of_continent(OCEANIA_9CF());
+		sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
+		ofc_club = high_rep_clubs[0];
+	}
 	// UEFA (12)
 	// - last 4 winners of UCL, last 4 winners of UEL, get UCL runner-ups as backup
 	vector<cm3_clubs*> uefa_clubs;
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(UEFA_CHAMPIONS_LEAGUE_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(uefa_clubs, winner)) uefa_clubs.push_back(winner);
+		cwc_add_club(winner, uefa_clubs, counts);
 	}
 	for (int i = 0; i < 4; i++) {
 		cm3_clubs* winner = get_last_comp_winner_by_year(get_comp(UEFA_EUROPA_LEAGUE_9CF()), year - i - 1);
-		if (winner && !vector_contains_element(uefa_clubs, winner)) uefa_clubs.push_back(winner);
+		cwc_add_club(winner, uefa_clubs, counts);
 	}
 	for (int i = 0; i < 4 && uefa_clubs.size() < 12; i++) {
 		cm3_clubs* runner_up = get_last_comp_runner_up_by_year(get_comp(UEFA_CHAMPIONS_LEAGUE_9CF()), year - i - 1);
-		if (runner_up && !vector_contains_element(uefa_clubs, runner_up)) uefa_clubs.push_back(runner_up);
+		cwc_try_add_club(runner_up, uefa_clubs, counts);
 	}
 	high_rep_clubs = find_clubs_of_continent(EUROPE_9CF());
 	sort(high_rep_clubs.begin(), high_rep_clubs.end(), compareClubRep);
@@ -526,7 +555,7 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	while (uefa_clubs.size() < 12)
 	{
 		cm3_clubs* backup = high_rep_clubs[backup_count++];
-		if (!vector_contains_element(uefa_clubs, backup)) uefa_clubs.push_back(backup);
+		cwc_try_add_club(backup, uefa_clubs, counts);
 	}
 	// Host (1)
 	cm3_clubs* host_club = 0;
@@ -571,14 +600,14 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	// Pot 1: The four top-ranked teams from both UEFA and CONMEBOL
 	for (int i = 0; i < 4; i++) {
 		teams[i].club = uefa_clubs[i];
-		teams[i].f5 = 10;
+		teams[i].seeding = 10;
 		teams[i].f6 = 0;
 		int ret = sub_5A0590(ae2a38_ptr, (BYTE*)uefa_clubs[i]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_uefa_participation_money"));
 		AddMoneyFromComp(_this, (BYTE*)uefa_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_uefa_participation_money"), 0, -1, GroupStage, 0, -2);
 
 		teams[i + 4].club = conmebol_clubs[i];
-		teams[i + 4].f5 = 10;
+		teams[i + 4].seeding = 10;
 		teams[i + 4].f6 = 0;
 		ret = sub_5A0590(ae2a38_ptr, (BYTE*)conmebol_clubs[i]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_conmebol_participation_money"));
@@ -587,7 +616,7 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	// Pot 2: The remaining eight teams from UEFA
 	for (int i = 0; i < 8; i++) {
 		teams[i + 8].club = uefa_clubs[i + 4];
-		teams[i + 8].f5 = 11;
+		teams[i + 8].seeding = 11;
 		teams[i + 8].f6 = 0;
 		int ret = sub_5A0590(ae2a38_ptr, (BYTE*)uefa_clubs[i + 4]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_uefa_participation_money"));
@@ -595,52 +624,52 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	}
 	// Pot 3: The two top-ranked teams from each of AFC, CAF and CONCACAF, and the remaining two teams from CONMEBOL
 	for (int i = 0; i < 2; i++) {
-		teams[i + 16].club = afc_clubs[i];
-		teams[i + 16].f5 = 12;
+		teams[i + 16].club = conmebol_clubs[i + 4];
+		teams[i + 16].seeding = 12;
 		teams[i + 16].f6 = 0;
-		int ret = sub_5A0590(ae2a38_ptr, (BYTE*)afc_clubs[i]);
-		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"));
-		AddMoneyFromComp(_this, (BYTE*)afc_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"), 0, -1, GroupStage, 0, -2);
+		int ret = sub_5A0590(ae2a38_ptr, (BYTE*)conmebol_clubs[i + 4]);
+		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_conmebol_participation_money"));
+		AddMoneyFromComp(_this, (BYTE*)conmebol_clubs[i + 4], prizeMoneyFile.GetInt("fifa_cwc_conmebol_participation_money"), 0, -1, GroupStage, 0, -2);
 
-		teams[i + 18].club = caf_clubs[i];
-		teams[i + 18].f5 = 12;
+		teams[i + 18].club = concacaf_clubs[i];
+		teams[i + 18].seeding = 12;
 		teams[i + 18].f6 = 0;
-		ret = sub_5A0590(ae2a38_ptr, (BYTE*)caf_clubs[i]);
-		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"));
-		AddMoneyFromComp(_this, (BYTE*)caf_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"), 0, -1, GroupStage, 0, -2);
-
-		teams[i + 20].club = concacaf_clubs[i];
-		teams[i + 20].f5 = 12;
-		teams[i + 20].f6 = 0;
 		ret = sub_5A0590(ae2a38_ptr, (BYTE*)concacaf_clubs[i]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_concacaf_participation_money"));
 		AddMoneyFromComp(_this, (BYTE*)concacaf_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_concacaf_participation_money"), 0, -1, GroupStage, 0, -2);
 
-		teams[i + 22].club = conmebol_clubs[i + 4];
-		teams[i + 22].f5 = 12;
+		teams[i + 20].club = caf_clubs[i];
+		teams[i + 20].seeding = 12;
+		teams[i + 20].f6 = 0;
+		ret = sub_5A0590(ae2a38_ptr, (BYTE*)caf_clubs[i]);
+		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"));
+		AddMoneyFromComp(_this, (BYTE*)caf_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"), 0, -1, GroupStage, 0, -2);
+
+		teams[i + 22].club = afc_clubs[i];
+		teams[i + 22].seeding = 12;
 		teams[i + 22].f6 = 0;
-		ret = sub_5A0590(ae2a38_ptr, (BYTE*)conmebol_clubs[i + 4]);
-		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_conmebol_participation_money"));
-		AddMoneyFromComp(_this, (BYTE*)conmebol_clubs[i + 4], prizeMoneyFile.GetInt("fifa_cwc_conmebol_participation_money"), 0, -1, GroupStage, 0, -2);
+		ret = sub_5A0590(ae2a38_ptr, (BYTE*)afc_clubs[i]);
+		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"));
+		AddMoneyFromComp(_this, (BYTE*)afc_clubs[i], prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"), 0, -1, GroupStage, 0, -2);
 	}
 	// Pot 4: The remaining teams from AFC, CAF, CONCACAF, OFC and host country
 	for (int i = 0; i < 2; i++) {
 		teams[i + 24].club = afc_clubs[i + 2];
-		teams[i + 24].f5 = 13;
+		teams[i + 24].seeding = 13;
 		teams[i + 24].f6 = 0;
 		int ret = sub_5A0590(ae2a38_ptr, (BYTE*)afc_clubs[i + 2]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"));
 		AddMoneyFromComp(_this, (BYTE*)afc_clubs[i + 2], prizeMoneyFile.GetInt("fifa_cwc_afc_participation_money"), 0, -1, GroupStage, 0, -2);
 
 		teams[i + 26].club = caf_clubs[i + 2];
-		teams[i + 26].f5 = 13;
+		teams[i + 26].seeding = 13;
 		teams[i + 26].f6 = 0;
 		ret = sub_5A0590(ae2a38_ptr, (BYTE*)caf_clubs[i + 2]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"));
 		AddMoneyFromComp(_this, (BYTE*)caf_clubs[i + 2], prizeMoneyFile.GetInt("fifa_cwc_caf_participation_money"), 0, -1, GroupStage, 0, -2);
 
 		teams[i + 28].club = concacaf_clubs[i + 2];
-		teams[i + 28].f5 = 13;
+		teams[i + 28].seeding = 13;
 		teams[i + 28].f6 = 0;
 		ret = sub_5A0590(ae2a38_ptr, (BYTE*)concacaf_clubs[i + 2]);
 		AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_concacaf_participation_money"));
@@ -648,14 +677,14 @@ void fifa_club_world_cup_all_teams(BYTE* _this) {
 	}
 
 	teams[30].club = ofc_club;
-	teams[30].f5 = 13;
+	teams[30].seeding = 13;
 	teams[30].f6 = 0;
 	int ret = sub_5A0590(ae2a38_ptr, (BYTE*)ofc_club);
 	AddToClubIncome((BYTE*)ret, prizeMoneyFile.GetInt("fifa_cwc_ofc_participation_money"));
 	AddMoneyFromComp(_this, (BYTE*)ofc_club, prizeMoneyFile.GetInt("fifa_cwc_ofc_participation_money"), 0, -1, GroupStage, 0, -2);
 
 	teams[31].club = host_club;
-	teams[31].f5 = 13;
+	teams[31].seeding = 13;
 	teams[31].f6 = 0;
 	if (host_club)
 	{
@@ -720,8 +749,8 @@ void fifa_club_world_cup_setup_groups(BYTE* _this, BYTE idx) {
 
 	WORD year = data->year;
 	BYTE* pStage = (BYTE*)cm0102_new(0xEE);
-	create_league_stage_data(pStage, _this, 4, pTeams, 1, (DWORD)(data->competition_db), pFixtures, num_rounds,
-		data->pts_for_win, data->pts_for_draw, data->f196, (BYTE*)(_this + 0xC5), (BYTE*)(_this + 0xBE),
+	create_league_stage_data(pStage, _this, data->n_teams, pTeams, data->n_rounds, (DWORD)(data->competition_db), pFixtures, num_rounds,
+		data->pts_for_win, data->pts_for_draw, data->f196, &data->tiebreaker_1, &data->promotions,
 		year, idx, stage_name_id, data->f81, 2, 0, data->f217, -1, 0, 2);
 	DWORD* stages_arr = data->stages;
 	*((DWORD*)(&stages_arr[idx])) = (DWORD)pStage;
@@ -733,9 +762,8 @@ void fifa_club_world_cup_setup_groups(BYTE* _this, BYTE idx) {
 
 char fifa_club_world_cup_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
-	sub_687970(_this, ebx);
+	sub_687970(_this, 0);
 	if (data->fixtures_table) {
 		sub_9452CA_free(data->fixtures_table);
 		data->fixtures_table = 0;
@@ -776,7 +804,7 @@ void __declspec(naked) fifa_club_world_cup_update_c()
 	}
 }
 
-int fifa_club_world_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int fifa_club_world_cup_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
 	if (stage < 7) {
@@ -815,7 +843,7 @@ int fifa_club_world_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate, char 
 	return 0;
 }
 
-void __declspec(naked) fifa_club_world_cup_set_table_fate()
+void __declspec(naked) fifa_club_world_cup_table_fates_c()
 {
 	__asm
 	{
@@ -827,7 +855,7 @@ void __declspec(naked) fifa_club_world_cup_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call fifa_club_world_cup_set_fates
+		call fifa_club_world_cup_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -867,6 +895,8 @@ void fifa_club_world_cup_final_stage_setup(BYTE* _this) {
 	DWORD* stages_arr = comp_data->stages;
 	*((DWORD*)(&stages_arr[stage_num])) = (DWORD)new_stage;
 	sub_51C800(new_stage, 0);
+	sub_9452CA_free(pTeams);
+	sub_9452CA_free(pFixtures);
 	comp_data->current_stage = (long)stage_num;
 }
 
@@ -898,7 +928,7 @@ void __declspec(naked) fifa_club_world_cup_stages_create_c()
 void fifa_club_world_cup_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
 	if (!data->f69) {
-		BYTE* cm_date = new BYTE[8];
+		BYTE cm_date[8];
 		convert_to_cm_date(cm_date, 3, January, data->year, -1);
 		WORD date_day = *(WORD*)(cm_date);
 		WORD date_year = *(WORD*)(cm_date + 2);
@@ -973,7 +1003,7 @@ void fifa_club_world_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	comp_stats* data = (comp_stats*)_this;
 	data->competition_db = comp;
 	WORD start_year = year;
-	while ((start_year - START_YEAR) % 4 != 0) {
+	while (start_year % 4 != 1) {
 		start_year++;
 	}
 	data->year = start_year;
@@ -984,7 +1014,7 @@ void fifa_club_world_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	fifa_club_world_cup_vtable->SetPointer(VTableSetChampion, (DWORD)&fifa_club_world_cup_set_champion_c);
 	fifa_club_world_cup_vtable->SetPointer(VTableClubLandmarks, 0x48cab0);
 	fifa_club_world_cup_vtable->SetPointer(VTableFixtures, (DWORD)&fifa_club_world_cup_fixture_caller);
-	fifa_club_world_cup_vtable->SetPointer(VTableTableFates, (DWORD)&fifa_club_world_cup_set_table_fate);
+	fifa_club_world_cup_vtable->SetPointer(VTableTableFates, (DWORD)&fifa_club_world_cup_table_fates_c);
 	fifa_club_world_cup_vtable->SetPointer(VTableStageNews, (DWORD)&cwc_stage_news_c);
 	fifa_club_world_cup_vtable->SetPointer(VTableReputationSetup, (DWORD)&fifa_club_world_cup_reputation_setup_c);
 	fifa_club_world_cup_vtable->SetPointer(VTableReputationCalc, (DWORD)&fifa_club_world_cup_reputation_calc_c);
@@ -1000,11 +1030,8 @@ void fifa_club_world_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	data->num_stages = 8;
 	data->stages = (DWORD*)cm0102_malloc(data->num_stages * 4);
 	fifa_club_world_cup_subs(_this);
-	BYTE* ebx = 0;
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	data->f69 = 0;
 }
@@ -1022,10 +1049,6 @@ void __declspec(naked) fifa_cwc_hosts_adjustment()
 }
 
 void setup_fifa_club_world_cup() {
-	WriteDWORD(0x5fa424 + 1, 2025);
+	WriteBytes(0x5fa452, 1, 24);
 	PatchFunction(0x5fa453, (DWORD)&fifa_cwc_hosts_adjustment);
-	// first host to USA
-	WriteDWORD(0x5fa460 + 2, 0x9cf4f8);
-	// replace duplicate UAE with Saudi Arabia
-	WriteDWORD(0x5fa4a6 + 1, 0x9cf458);
 }

@@ -7,7 +7,7 @@ char* szDebugFile = "";
 
 Config configFile = Config();
 Config prizeMoneyFile = Config();
-std::default_random_engine rng = std::default_random_engine{};
+std::default_random_engine rng = std::default_random_engine((unsigned int)time(0));
 
 void dprintf(const char* fmt, ...)
 {
@@ -48,6 +48,19 @@ void WriteBytes(DWORD addr, int bytes, ...)
 		addr++;
 	}
 	va_end(valist);
+}
+
+void WriteString(DWORD addr, int length, char* bytes)
+{
+	for (int i = 0; i < length; i++)
+	{
+		DWORD dwOldProt, dwOldProt2;
+		VirtualProtect((void*)addr, 1, PAGE_EXECUTE_READWRITE, &dwOldProt);
+		*((BYTE*)addr) = bytes[i];
+		VirtualProtect((void*)addr, 1, dwOldProt, &dwOldProt2);
+
+		addr++;
+	}
 }
 
 void WriteNOP(DWORD addr, int bytes)
@@ -115,12 +128,20 @@ DWORD Get9CF(DWORD id)
 	return *(DWORD*)id;
 }
 
-WORD get_world_cup_hosts_in_continent(BYTE* _this, DWORD continentID, DWORD* out_host1_id, DWORD* out_host2_id) {
+WORD get_comp_hosts_in_continent(BYTE* _this, DWORD compID, DWORD continentID, DWORD* out_host1_id, DWORD* out_host2_id) {
 	comp_stats* data = (comp_stats*)_this;
 	WORD year = data->year;
-	while (year % 4 != 2) year++;
+	WORD modulo = 0;
+	if (compID == AFCON_9CF() && year == 2025) year = 2027;
+	else
+	{
+		if (compID == FIFA_WORLD_CUP_9CF()) modulo = 2;
+		if (compID == ASIAN_CUP_9CF()) modulo = 3;
+		while (year % 4 != modulo) year++;
+	}
+
 	DWORD host1_id = -1, host2_id = -1;
-	char num_hosts = get_host_ids_5FA730((BYTE*)*b5e134, FIFA_WORLD_CUP_9CF(), year, &host1_id, &host2_id, 1);
+	char num_hosts = get_host_ids_5FA730((BYTE*)*b5e134, compID, year, &host1_id, &host2_id, 1);
 	WORD num_to_exclude = 0;
 	if (num_hosts > 0) {
 		cm3_nations* host1 = get_country(host1_id);
@@ -131,6 +152,7 @@ WORD get_world_cup_hosts_in_continent(BYTE* _this, DWORD continentID, DWORD* out
 		}
 		else if (out_host1_id) *out_host1_id = -1;
 	}
+	else if (out_host1_id) *out_host1_id = -1;
 	if (num_hosts > 1) {
 		cm3_nations* host2 = get_country(host2_id);
 		if (host2->NationContinent && host2->NationContinent->ContinentID == continentID)
@@ -140,6 +162,7 @@ WORD get_world_cup_hosts_in_continent(BYTE* _this, DWORD continentID, DWORD* out
 		}
 		else if (out_host2_id) *out_host2_id = -1;
 	}
+	else if (out_host2_id) *out_host2_id = -1;
 	return num_to_exclude;
 }
 
@@ -148,28 +171,43 @@ cm3_clubs* get_club(DWORD clubID)
 	return (clubID != -1L) ? &(*clubs)[clubID] : NULL;
 }
 
-cm3_clubs* get_national_team(DWORD nationID)
+cm3_clubs* get_national_team(DWORD nationID, bool youth)
 {
-	return (nationID != -1L) ? &(*clubs)[*clubs_count + (nationID - 2 * *nations_count)] : NULL;
+	int mult = (youth) ? 1 : 2;
+	return (nationID != -1L) ? &(*clubs)[*clubs_count + (nationID - mult * *nations_count)] : NULL;
 }
 
-vector<cm3_clubs*> get_all_national_teams() {
+vector<cm3_clubs*> get_all_national_teams(bool youth) {
+	int mult = (youth) ? 1 : 2;
 	vector<cm3_clubs*> ret;
 	for (DWORD i = 0; i < *nations_count; i++)
 	{
-		cm3_clubs* c = &(*clubs)[*clubs_count + (i - 2 * *nations_count)];
+		cm3_clubs* c = &(*clubs)[*clubs_count + (i - mult * *nations_count)];
 		if (c->ClubNation && c->ClubNation->NationContinent)
 			ret.push_back(c);
 	}
 	return ret;
 }
 
-vector<cm3_clubs*> get_national_teams_of_continent(DWORD continentID) {
+vector<cm3_clubs*> get_national_teams_of_continent(DWORD continentID, bool youth) {
+	int mult = (youth) ? 1 : 2;
 	vector<cm3_clubs*> ret;
 	for (DWORD i = 0; i < *nations_count; i++)
 	{
-		cm3_clubs* c = &(*clubs)[*clubs_count + (i - 2 * *nations_count)];
+		cm3_clubs* c = &(*clubs)[*clubs_count + (i - mult * *nations_count)];
 		if (c->ClubNation && c->ClubNation->NationContinent && c->ClubNation->NationContinent->ContinentID == continentID)
+			ret.push_back(c);
+	}
+	return ret;
+}
+
+vector<cm3_clubs*> get_national_teams_of_continent_fifa_members(DWORD continentID, bool youth) {
+	int mult = (youth) ? 1 : 2;
+	vector<cm3_clubs*> ret;
+	for (DWORD i = 0; i < *nations_count; i++)
+	{
+		cm3_clubs* c = &(*clubs)[*clubs_count + (i - mult * *nations_count)];
+		if (c->ClubNation && c->ClubNation->NationContinent && c->ClubNation->NationContinent->ContinentID == continentID && !is_nation_non_fifa(c->ClubNation))
 			ret.push_back(c);
 	}
 	return ret;
@@ -266,97 +304,97 @@ vector<cm3_nations*> caribbean_countries()
 }
 
 vector<DWORD> east_asia_nations() {
-	vector<DWORD> ret;
-	ret.push_back(NATION_JAPAN_9CF());
-	ret.push_back(NATION_SOUTH_KOREA_9CF());
-	ret.push_back(NATION_CHINA_9CF());
-	ret.push_back(NATION_THAILAND_9CF());
-	ret.push_back(NATION_AUSTRALIA_9CF());
-	ret.push_back(NATION_MALAYSIA_9CF());
-	ret.push_back(NATION_VIETNAM_9CF());
-	ret.push_back(NATION_HONG_KONG_9CF());
-	ret.push_back(NATION_SINGAPORE_9CF());
-	ret.push_back(NATION_PHILIPPINES_9CF());
-	ret.push_back(NATION_INDONESIA_9CF());
-	ret.push_back(NATION_NORTH_KOREA_9CF());
-	ret.push_back(NATION_CAMBODIA_9CF());
-	ret.push_back(NATION_MYANMAR_9CF());
-	ret.push_back(NATION_CHINESE_TAIPEI_9CF());
-	ret.push_back(NATION_MONGOLIA_9CF());
-	ret.push_back(NATION_MACAU_9CF());
-	ret.push_back(NATION_LAOS_9CF());
-	ret.push_back(NATION_BRUNEI_9CF());
-	ret.push_back(NATION_GUAM_9CF());
-	//ret.push_back(NATION_NORTHERN_MARIANA_9CF());
-	ret.push_back(NATION_TIMOR_9CF());
-	return ret;
+	return {
+		NATION_JAPAN_9CF(),
+		NATION_SOUTH_KOREA_9CF(),
+		NATION_THAILAND_9CF(),
+		NATION_CHINA_9CF(),
+		NATION_AUSTRALIA_9CF(),
+		NATION_MALAYSIA_9CF(),
+		NATION_VIETNAM_9CF(),
+		NATION_SINGAPORE_9CF(),
+		NATION_HONG_KONG_9CF(),
+		NATION_CAMBODIA_9CF(),
+		NATION_INDONESIA_9CF(),
+		NATION_PHILIPPINES_9CF(),
+		NATION_MYANMAR_9CF(),
+		NATION_CHINESE_TAIPEI_9CF(),
+		NATION_NORTH_KOREA_9CF(),
+		NATION_MONGOLIA_9CF(),
+		NATION_MACAU_9CF(),
+		NATION_LAOS_9CF(),
+		NATION_BRUNEI_9CF(),
+		NATION_TIMOR_LESTE_9CF(),
+		NATION_GUAM_9CF(),
+		NATION_NORTHERN_MARIANA_9CF(),
+	};
 }
 
 vector<DWORD> west_asia_nations() {
-	vector<DWORD> ret;
-	ret.push_back(NATION_SAUDI_ARABIA_9CF());
-	ret.push_back(NATION_UAE_9CF());
-	ret.push_back(NATION_QATAR_9CF());
-	ret.push_back(NATION_IRAN_9CF());
-	ret.push_back(NATION_UZBEKISTAN_9CF());
-	ret.push_back(NATION_IRAQ_9CF());
-	ret.push_back(NATION_JORDAN_9CF());
-	ret.push_back(NATION_BAHRAIN_9CF());
-	ret.push_back(NATION_INDIA_9CF());
-	ret.push_back(NATION_TAJIKISTAN_9CF());
-	ret.push_back(NATION_TURKMENISTAN_9CF());
-	ret.push_back(NATION_OMAN_9CF());
-	ret.push_back(NATION_LEBANON_9CF());
-	ret.push_back(NATION_KUWAIT_9CF());
-	ret.push_back(NATION_BANGLADESH_9CF());
-	ret.push_back(NATION_SYRIA_9CF());
-	ret.push_back(NATION_KYRGYZSTAN_9CF());
-	ret.push_back(NATION_MALDIVES_9CF());
-	ret.push_back(NATION_PALESTINE_9CF());
-	ret.push_back(NATION_NEPAL_9CF());
-	ret.push_back(NATION_SRI_LANKA_9CF());
-	ret.push_back(NATION_BHUTAN_9CF());
-	ret.push_back(NATION_AFGHANISTAN_9CF());
-	ret.push_back(NATION_PAKISTAN_9CF());
-	ret.push_back(NATION_YEMEN_9CF());
-	return ret;
+	return {
+		NATION_SAUDI_ARABIA_9CF(),
+		NATION_UAE_9CF(),
+		NATION_QATAR_9CF(),
+		NATION_IRAN_9CF(),
+		NATION_UZBEKISTAN_9CF(),
+		NATION_IRAQ_9CF(),
+		NATION_JORDAN_9CF(),
+		NATION_BAHRAIN_9CF(),
+		NATION_OMAN_9CF(),
+		NATION_INDIA_9CF(),
+		NATION_TURKMENISTAN_9CF(),
+		NATION_KUWAIT_9CF(),
+		NATION_LEBANON_9CF(),
+		NATION_TAJIKISTAN_9CF(),
+		NATION_KYRGYZSTAN_9CF(),
+		NATION_BANGLADESH_9CF(),
+		NATION_SYRIA_9CF(),
+		NATION_MALDIVES_9CF(),
+		NATION_PALESTINE_9CF(),
+		NATION_BHUTAN_9CF(),
+		NATION_NEPAL_9CF(),
+		NATION_AFGHANISTAN_9CF(),
+		NATION_SRI_LANKA_9CF(),
+		NATION_YEMEN_9CF(),
+		NATION_PAKISTAN_9CF(),
+	};
 }
 
 vector<DWORD> caf_top_12_nations() {
-	vector<DWORD> ret;
-	ret.push_back(NATION_EGYPT_9CF());
-	ret.push_back(NATION_MOROCCO_9CF());
-	ret.push_back(NATION_SOUTH_AFRICA_9CF());
-	ret.push_back(NATION_ALGERIA_9CF());
-	ret.push_back(NATION_TANZANIA_9CF());
-	ret.push_back(NATION_TUNISIA_9CF());
-	ret.push_back(NATION_ANGOLA_9CF());
-	ret.push_back(NATION_DR_CONGO_9CF());
-	ret.push_back(NATION_SUDAN_9CF());
-	ret.push_back(NATION_IVORY_COAST_9CF());
-	ret.push_back(NATION_LIBYA_9CF());
-	ret.push_back(NATION_NIGERIA_9CF());
-	return ret;
+	return {
+		NATION_EGYPT_9CF(),
+		NATION_MOROCCO_9CF(),
+		NATION_ALGERIA_9CF(),
+		NATION_SOUTH_AFRICA_9CF(),
+		NATION_TANZANIA_9CF(),
+		NATION_TUNISIA_9CF(),
+		NATION_ANGOLA_9CF(),
+		NATION_DR_CONGO_9CF(),
+		NATION_SUDAN_9CF(),
+		NATION_MALI_9CF(),
+		NATION_IVORY_COAST_9CF(),
+		NATION_NIGERIA_9CF(),
+	};
 }
 
 vector<DWORD> caf_bottom_6_nations() {
-	vector<DWORD> ret;
-	ret.push_back(NATION_CHAD_9CF());
-	ret.push_back(NATION_ERITREA_9CF());
-	ret.push_back(NATION_SAO_TOME_PRINCIPE_9CF());
-	ret.push_back(NATION_SOMALIA_9CF());
-	ret.push_back(NATION_DJIBOUTI_9CF());
-	ret.push_back(NATION_SEYCHELLES_9CF());
-	return ret;
+	return {
+		NATION_CAPE_VERDE_9CF(),
+		NATION_ERITREA_9CF(),
+		NATION_SAO_TOME_PRINCIPE_9CF(),
+		NATION_CONGO_9CF(),
+		NATION_CENTRAL_AFRICA_9CF(),
+	};
 }
 
 vector<DWORD> ofc_bottom_4_nations() {
-	vector<DWORD> ret;
-	ret.push_back(NATION_AMERICAN_SAMOA_9CF());
-	ret.push_back(NATION_COOK_ISLANDS_9CF());
-	ret.push_back(NATION_SAMOA_9CF());
-	ret.push_back(NATION_TONGA_9CF());
-	return ret;
+	return
+	{
+		NATION_AMERICAN_SAMOA_9CF(),
+		NATION_COOK_ISLANDS_9CF(),
+		NATION_SAMOA_9CF(),
+		NATION_TONGA_9CF(),
+	};
 }
 
 vector<cm3_nations*> get_countries_of_continent(DWORD continentID) {
@@ -508,6 +546,10 @@ vector<cm3_clubs*> find_clubs_of_country_for_euro_playable(DWORD nation_id)
 			if (it != ret.end()) ret.erase(it);
 		}
 	}
+	// Special case: AFC Champions League Two winner
+	cm3_club_comps* cl_two = get_comp(AFC_CHAMPIONS_LEAGUE_TWO_9CF());
+	cm3_clubs* cl_two_winner = get_last_comp_winner(cl_two);
+	if (cl_two_winner && cl_two_winner->ClubNation && cl_two_winner->ClubNation->NationID == nation_id) ret.push_back(cl_two_winner);
 	return ret;
 }
 
@@ -786,7 +828,7 @@ bool compareClubWEDiagNS(cm3_clubs* c1, cm3_clubs* c2)
 	return atan2(-lon1, lat1) > atan2(-lon2, lat2);
 }
 
-bool compareClubNation(cm3_clubs* c1, cm3_clubs* c2)
+bool compareClubNationID(cm3_clubs* c1, cm3_clubs* c2)
 {
 	long n1 = -1, n2 = -1;
 	if (c1->ClubNation)
@@ -800,11 +842,34 @@ bool compareClubNation(cm3_clubs* c1, cm3_clubs* c2)
 	return n1 < n2;
 }
 
+bool compareClubNationRep(cm3_nations* n1, cm3_nations* n2)
+{
+	return (n1->NationReputation > n2->NationReputation);
+}
+
+bool compareClubAFCElite(cm3_clubs* c1, cm3_clubs* c2)
+{
+	if (!c1->ClubNation || !c2->ClubNation) return compareClubRep(c1, c2);
+	static const vector<DWORD> asia_west = west_asia_nations();
+	static const vector<DWORD> asia_east = east_asia_nations();
+	int c1_west = distance(asia_west.begin(), find(asia_west.begin(), asia_west.end(), c1->ClubNation->NationID));
+	int c2_west = distance(asia_west.begin(), find(asia_west.begin(), asia_west.end(), c2->ClubNation->NationID));
+	int c1_east = distance(asia_east.begin(), find(asia_east.begin(), asia_east.end(), c1->ClubNation->NationID));
+	int c2_east = distance(asia_east.begin(), find(asia_east.begin(), asia_east.end(), c2->ClubNation->NationID));
+	if (c1_west == asia_west.size() || c2_west == asia_west.size()) {
+		if (c1_east == asia_east.size() || c2_east == asia_east.size()) return compareClubRep(c1, c2);
+		else if (c1_east == c2_east) return compareClubRep(c1, c2);
+		else return c1_east < c2_east;
+	}
+	else if (c1_west == c2_west) return compareClubRep(c1, c2);
+	else return c1_west < c2_west;
+}
+
 bool compareClubAsiaWestEast(cm3_clubs* c1, cm3_clubs* c2)
 {
 	bool c1_west = false, c2_west = false;
 	if (!c1->ClubNation || !c2->ClubNation) return compareClubLongitude(c1, c2);
-	vector<DWORD> asia_west = west_asia_nations();
+	static const vector<DWORD> asia_west = west_asia_nations();
 	c1_west = find(asia_west.begin(), asia_west.end(), c1->ClubNation->NationID) != asia_west.end();
 	c2_west = find(asia_west.begin(), asia_west.end(), c2->ClubNation->NationID) != asia_west.end();
 	if (c1_west != c2_west) return c1_west;
@@ -813,44 +878,36 @@ bool compareClubAsiaWestEast(cm3_clubs* c1, cm3_clubs* c2)
 
 cm3_clubs* get_last_comp_winner(cm3_club_comps* comp)
 {
-	vector<cm3_club_comp_history*> ret;
+	cm3_club_comp_history* latest = nullptr;
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		if ((*club_comp_histories)[i].ClubCompHistoryClubComp == comp)
+		cm3_club_comp_history* hist = &(*club_comp_histories)[i];
+		if (hist->ClubCompHistoryClubComp == comp &&
+			(!latest || hist->ClubCompHistoryYear > latest->ClubCompHistoryYear))
 		{
-			cm3_club_comp_history* hist = &(*club_comp_histories)[i];
-			ret.push_back(hist);
+			latest = hist;
 		}
 	}
-	if (ret.size() < 1) return nullptr;
-	sort(ret.begin(), ret.end(), [](const cm3_club_comp_history* h1, const cm3_club_comp_history* h2)
-		{
-			return h1->ClubCompHistoryYear > h2->ClubCompHistoryYear;
-		});
-	return ret[0]->ClubCompHistoryWinners;
+	return latest ? latest->ClubCompHistoryWinners : nullptr;
 }
 
 cm3_clubs* get_last_comp_runner_up(cm3_club_comps* comp)
 {
-	vector<cm3_club_comp_history*> ret;
+	cm3_club_comp_history* latest = nullptr;
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		if ((*club_comp_histories)[i].ClubCompHistoryClubComp == comp)
+		cm3_club_comp_history* hist = &(*club_comp_histories)[i];
+		if (hist->ClubCompHistoryClubComp == comp &&
+			(!latest || hist->ClubCompHistoryYear > latest->ClubCompHistoryYear))
 		{
-			cm3_club_comp_history* hist = &(*club_comp_histories)[i];
-			ret.push_back(hist);
+			latest = hist;
 		}
 	}
-	if (ret.size() < 1) return nullptr;
-	sort(ret.begin(), ret.end(), [](const cm3_club_comp_history* h1, const cm3_club_comp_history* h2)
-		{
-			return h1->ClubCompHistoryYear > h2->ClubCompHistoryYear;
-		});
-	return ret[0]->ClubCompHistoryRunnersUp;
+	return latest ? latest->ClubCompHistoryRunnersUp : nullptr;
 }
 
 cm3_clubs* get_last_comp_winner_by_year(cm3_club_comps* comp, WORD year)
 {
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		cm3_club_comp_history hist = (*club_comp_histories)[i];
+		cm3_club_comp_history& hist = (*club_comp_histories)[i];
 		if (hist.ClubCompHistoryClubComp == comp && hist.ClubCompHistoryYear == year)
 		{
 			return hist.ClubCompHistoryWinners;
@@ -862,7 +919,7 @@ cm3_clubs* get_last_comp_winner_by_year(cm3_club_comps* comp, WORD year)
 cm3_clubs* get_last_comp_runner_up_by_year(cm3_club_comps* comp, WORD year)
 {
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		cm3_club_comp_history hist = (*club_comp_histories)[i];
+		cm3_club_comp_history& hist = (*club_comp_histories)[i];
 		if (hist.ClubCompHistoryClubComp == comp && hist.ClubCompHistoryYear == year)
 		{
 			return hist.ClubCompHistoryRunnersUp;
@@ -970,7 +1027,7 @@ vector<cm3_clubs*> get_relegated_teams(DWORD compID)
 	return relegated_clubs;
 }
 
-bool sortTLS(team_league_stats s1, team_league_stats s2)
+bool sortTLS(const team_league_stats& s1, const team_league_stats& s2)
 {
 	if (s1.points != s2.points) return s1.points > s2.points;
 	int diff1 = s1.goals_for - s1.goals_against;
@@ -981,13 +1038,13 @@ bool sortTLS(team_league_stats s1, team_league_stats s2)
 	return s1.club->ClubReputation > s2.club->ClubReputation;
 }
 
-bool sortTeamSeeding(teams_seeded s1, teams_seeded s2)
+bool sortTeamSeeding(const teams_seeded& s1, const teams_seeded& s2)
 {
-	if (s1.f5 != s2.f5) return s1.f5 < s2.f5;
+	if (s1.seeding != s2.seeding) return s1.seeding < s2.seeding;
 	return s1.club->ClubReputation > s2.club->ClubReputation;
 }
 
-vector<cm3_clubs*> weighted_reservoir_sampling(vector<cm3_clubs*> population, unsigned int sample_size) {
+vector<cm3_clubs*> weighted_reservoir_sampling(const vector<cm3_clubs*>& population, unsigned int sample_size) {
 	unsigned int i = 0;
 	vector<cm3_clubs*> reservoir;
 	if (sample_size < 1) return reservoir;
@@ -1010,7 +1067,7 @@ vector<cm3_clubs*> weighted_reservoir_sampling(vector<cm3_clubs*> population, un
 	return reservoir;
 }
 
-vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(vector<cm3_clubs*> population, unsigned int sample_size) {
+vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(const vector<cm3_clubs*>& population, unsigned int sample_size) {
 	unsigned int i = 0;
 	vector<cm3_clubs*> reservoir;
 	if (sample_size < 1) return reservoir;
@@ -1033,9 +1090,40 @@ vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(vector<cm3_clubs*>
 	return reservoir;
 }
 
-vector<cm3_clubs*> get_random_weighted_clubs(vector<cm3_clubs*> list, unsigned int amount, bool to_promote) {
+vector<cm3_clubs*> get_random_weighted_clubs(const vector<cm3_clubs*>& list, unsigned int amount, bool to_promote) {
 	if (to_promote) return weighted_reservoir_sampling(list, amount);
 	else return weighted_reservoir_sampling_invert_weights(list, amount);
+}
+
+vector<cm3_clubs*> get_random_weighted_national_teams(const vector<cm3_clubs*>& population, unsigned int sample_size) {
+	unsigned int i = 0;
+	vector<cm3_clubs*> reservoir;
+	if (sample_size < 1) return reservoir;
+	vector<double> keys;
+	for (; i < sample_size; i++) {
+		cm3_clubs* c = population[i];
+		reservoir.push_back(c);
+		//double val = 2000. * getFIFARankingPoints(c->ClubNation);
+		double val = (((getFIFARankingPoints(c->ClubNation) - 700) * 10000) / 1300); // 1300 = max - min
+		//double logx = val * log(val);
+		double logx = val;
+		keys.push_back(pow(((double)rand() / (RAND_MAX)), 1.0f / logx));
+	}
+	for (; i < population.size(); i++) {
+		cm3_clubs* c = population[i];
+		auto threshold = min_element(keys.begin(), keys.end());
+		int member_idx = distance(begin(keys), threshold);
+		//double val = 2000. * getFIFARankingPoints(c->ClubNation);
+		double val = (((getFIFARankingPoints(c->ClubNation) - 700) * 10000) / 1300); // 1300 = max - min
+		//double logx = val * log(val);
+		double logx = val;
+		double new_key = pow(((double)rand() / (RAND_MAX)), 1.0f / logx);
+		if (new_key > *threshold) {
+			keys[member_idx] = new_key;
+			reservoir[member_idx] = c;
+		}
+	}
+	return reservoir;
 }
 
 void generic_prom_rel(DWORD nation_id, DWORD promote_from, DWORD relegate_from, int num_child_comps, ...) {
@@ -1073,20 +1161,20 @@ int UpdateCountryCoefficient(cm3_clubs* club, char coeff) {
 	return sub_9058B0((BYTE*)*uefa_seeding_list, nation, coeff);
 }
 
-void add_team_to_world_cup(cm3_clubs* club, bool send_news) {
+void qualify_team_for_international_comp(cm3_clubs* club, DWORD comp_id, bool send_news) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
-	BYTE* world_cup_bytes = get_loaded_league(FIFA_WORLD_CUP_9CF());
-	comp_stats* world_cup_data = (comp_stats*)world_cup_bytes;
-	teams_seeded* qualifiers = (teams_seeded*)world_cup_data->special_teams_seedings;
-	WORD insert_idx = world_cup_data->special_nteams_seedings;
-	if (insert_idx >= world_cup_data->f56) create_message_box("Error", "Tried to add team to World Cup, but already have enough teams", true);
+	BYTE* comp_bytes = get_loaded_league(comp_id);
+	comp_stats* comp_data = (comp_stats*)comp_bytes;
+	teams_seeded* qualifiers = (teams_seeded*)comp_data->special_teams_seedings;
+	WORD insert_idx = comp_data->special_nteams_seedings;
+	if (insert_idx >= comp_data->f56) create_message_box(comp_data->competition_db->ClubCompName, "Tried to add team to competition, but already have enough teams", true);
 	else {
 		qualifiers[insert_idx].club = club;
-		qualifiers[insert_idx].f5 = 6;
+		qualifiers[insert_idx].seeding = 6;
 		qualifiers[insert_idx].f6 = 0;
-		world_cup_data->special_nteams_seedings++;
-		staff_history_qualified_86BDD0(staff_hist_ptr, club, (DWORD)world_cup_data->competition_db, None, None, 0x64);
-		if (send_news) sub_7779B0((BYTE*)*b74318, club, world_cup_data->competition_db);
+		comp_data->special_nteams_seedings++;
+		staff_history_qualified_86BDD0(staff_hist_ptr, club, (DWORD)comp_data->competition_db, None, None, 0x64);
+		if (send_news) sub_7779B0((BYTE*)*b74318, club, comp_data->competition_db);
 	}
 }
 
@@ -1099,7 +1187,7 @@ void add_team_to_world_cup_playoffs(cm3_clubs* club) {
 	if (insert_idx >= world_cup_data->f56 - 1) create_message_box("Error", "Tried to add team to World Cup Playoffs, but already have enough teams", true);
 	else {
 		qualifiers[insert_idx].club = club;
-		qualifiers[insert_idx].f5 = 6;
+		qualifiers[insert_idx].seeding = 6;
 		qualifiers[insert_idx].f6 = 0;
 		world_cup_data->special_nteams_seedings++;
 		staff_history_qualified_86BDD0(staff_hist_ptr, club, (DWORD)world_cup_data->competition_db, None, None, 0x1E);
@@ -1117,3 +1205,56 @@ vector<wstring> split_string_spaces(const wstring& str) {
 
 	return tokens;
 }
+
+bool is_nation_non_fifa(cm3_nations* n) {
+	return n->NationID == NATION_NORTHERN_MARIANA_9CF() ||
+		n->NationID == NATION_GUADELOUPE_9CF() ||
+		n->NationID == NATION_BONAIRE_9CF() ||
+		n->NationID == NATION_FRENCH_GUIANA_9CF() ||
+		n->NationID == NATION_MARTINIQUE_9CF() ||
+		n->NationID == NATION_REUNION_9CF() ||
+		n->NationID == NATION_SAINT_MARTIN_9CF() ||
+		n->NationID == NATION_SINT_MAARTEN_9CF();
+}
+
+// Possible future implementation of 0x7E9180, for international competitions:
+/*
+mov eax,dword ptr ds:[ecx+0x13]
+push edi
+xor edi,edi
+test eax,eax
+jle reset_int_bans_end
+push ebx
+mov ebx,dword ptr ss:[esp+0xc]
+push ebp
+push esi
+xor esi,esi
+reset_int_bans_loop:
+mov edx,dword ptr ds:[ecx+0xb]
+add edx,esi
+mov eax,dword ptr ds:[edx]
+cmp eax,-1
+je reset_int_bans_jmp1
+test ebx,ebx
+je reset_int_bans_clear
+lea ebp,dword ptr ds:[eax+eax*4]
+lea eax,dword ptr ds:[eax+ebp*2]
+mov ebp,dword ptr ds:[0xae23bc]
+lea eax,dword ptr ds:[eax+eax*4]
+cmp dword ptr ss:[ebp+eax*2+0x1a],ebx
+jnz reset_int_bans_jmp1
+reset_int_bans_clear:
+mov byte ptr ds:[edx+4],0
+reset_int_bans_jmp1:
+mov eax,dword ptr ds:[ecx+0x13]
+inc edi
+add esi,0xe
+cmp edi,eax
+jl reset_int_bans_loop
+pop esi
+pop ebp
+pop ebx
+reset_int_bans_end:
+pop edi
+ret 4
+*/

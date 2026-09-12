@@ -13,19 +13,19 @@ enum VTablePointers {
 	VTableLeagueSplit = 6, // Related to leagues with a split at the end of the regular season (Scotland), similar to 11 below
 	VTable7 = 7,
 	VTable8 = 8,
-	VTable9 = 9,
-	VTable10 = 10,
+	VTableLoadCompInfo = 9, // Called when loading a save game
+	VTableSaveCompInfo = 10, // Called when saving a save game
 	VTablePlayoffQual = 11, // Creates any later stages in competitions when needed (playoffs etc)
 	VTable12 = 12,
 	VTableSetChampion = 13, // Called when competition finishes, creates history entry with winner
-	VTable14 = 14,
+	VTable14 = 14, // average points?
 	VTableClubLandmarks = 15, // Text that shows in "Competitions" club page (Winners, round they were eliminated in, etc)
 	VTableFixtures = 16, // Creates fixtures for the competition
 	VTable17 = 17,
 	VTableTableFates = 18, // Sets table information (champions, promoted etc)
 	VTableStageNews = 19, // Sends out news (champions, promoted etc)
 	VTable20 = 20,
-	VTable21 = 21, // returns AL=3 to show third-place teams in history, AL=2 only shows winner and runner-up
+	VTableShowThirdInHistory = 21, // returns AL=3 to show third-place teams in history, AL=2 only shows winner and runner-up
 	VTable22 = 22,
 	VTable23 = 23,
 	VTableReputationSetup = 24, // Called during setup and update, is connected to club reputation update
@@ -33,16 +33,16 @@ enum VTablePointers {
 	VTable26 = 26,
 	VTableReputationCalc = 27, // Called often throughout the season, is connected to club reputation update
 	VTable28 = 28,
-	VTable29 = 29,
-	VTable30 = 30,
-	VTable31 = 31,
-	VTable32 = 32,
+	VTable29 = 29, // sets initial expectations?
+	VTable30 = 30, // calculates board happiness based on final position?
+	VTableGetFinalsComp = 31, // returns the corresponding "finals" competition => for World Cup qualifiers, returns World Cup for example
+	VTable32 = 32, // used in original Australian NSL?
 	VTable33 = 33,
 	VTable34 = 34,
-	VTable35 = 35, // AL=1 to show hosts in comp history, AL=0 otherwise
+	VTableShowHostsInHistory = 35, // AL=1 to show hosts in comp history, AL=0 otherwise
 	VTableSubsRounds = 36, // Sets things such as: number of substitutes, number of promoted/relegated teams, etc
 	VTable37 = 37,
-	VTable38 = 38,
+	VTable38 = 38, // used in original Belgian Second Division?
 	VTable39 = 39, // affects board expectations regarding promotion?
 	VTable40 = 40, // affects board expectations regarding relegation?
 	VTableAwardTeamsSetup = 41, // For leagues with groups, gets all the teams in the league for award purposes
@@ -52,40 +52,66 @@ enum VTablePointers {
 	VTablePromRelUpdate = 45, // Relevant in top leagues with league structures that involve groups
 };
 
+enum DisciplineVTablePointers {
+	VTableD1 = 1,
+	VTableD2 = 2,
+	VTableD3 = 3,
+	VTableD4 = 4,
+	VTableDBanText = 5, // gets part of the text to show in the ban mssage
+	VTableD6 = 6,
+	VTableD7 = 7,
+	VTableD8 = 8,
+};
+
+enum RulesVTablePointers {
+	VTableR1 = 1,
+	VTableR2 = 2,
+	VTableR3 = 3,
+	VTableR4 = 4,
+	VTableR5 = 5,
+	VTableR6 = 6,
+	VTableR7 = 7,
+	VTableRForeignRules = 8, // foreign player restrictions
+	VTableRLoanOutsideWindow = 9, // can loan players outside transfer window?
+	VTableRLoanRules = 10, // specific rules to allow (or not) loans between specific teams
+	VTableRLoanLength = 11, // allowed lengths for loans
+	VTableRSendWindowNews = 12, // creates the news themselves
+	VTableRWindowNewsText = 13, // deadline lifted/ending/ended news
+};
+
 class vtable
 {
 public:
-	vtable() {
-		std::fill(std::begin(vtable_bytes), std::end(vtable_bytes), 0xFF);
-	}
+	//vtable() {
+	//	std::fill(std::begin(vtable_bytes), std::end(vtable_bytes), 0xFF);
+	//}
 
 	vtable(BYTE* src, int amt) {
+		sz = amt;
+		vtable_bytes = new BYTE[amt];
+		vtable_ptr = vtable_bytes;
 		for (int i = 0; i < amt; i++) vtable_bytes[i] = src[i];
 	}
 
 	void SetPointer(int pos, DWORD funcAddr)
 	{
+		if (pos * 4 > sz) return;
 		WriteDWORD((DWORD)(&vtable_ptr[(pos - 1) * 4]), funcAddr);
-	}
-
-	static void PrintVTable(DWORD addr, const char* tableName = "")
-	{
-		BYTE* ptr = (BYTE*)addr;
-		dprintf("%s VTable at %08X:\n", tableName, addr);
-		for (BYTE i = 0; i < sizeof(addr); i += 4)
-			dprintf("%02X = %08X\n", i, (*(DWORD*)&ptr[i]));
 	}
 
 	void PrintVTable()
 	{
-		for (BYTE i = 0; i < sizeof(vtable_bytes); i += 4)
+		for (BYTE i = 0; i < sz / 4; i += 4)
 			dprintf("%02X = %08X\n", i, (*(DWORD*)&vtable_bytes[i]));
 	}
 
-	// mov eax, dword ptr[vtable_eng_league_2.vtable_ptr]
-	// vtable::PrintVTable(0x969E84, "eng_league_2");
-	BYTE* vtable_ptr = vtable_bytes;
+	BYTE* vtable_ptr;// = vtable_bytes;
 	// Cup competitions (with no group stage) only use 0xA0 bytes
-	BYTE vtable_bytes[0xB4] = { 0x0 };
+	// Discipline uses 0x20 bytes
+	// Rules uses 0x34 bytes
+	//BYTE vtable_bytes[0xB4] = { 0x0 };
+	BYTE* vtable_bytes;
 
+private:
+	int sz;
 };

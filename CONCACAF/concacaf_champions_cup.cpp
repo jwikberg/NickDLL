@@ -8,7 +8,7 @@
 #include "Helpers\constants.h"
 #include "Helpers\generic_functions.h"
 #include "Structures\vtable.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 DWORD* concacaf_champions_cup_vtable = (DWORD*)0x968AA0;
 
@@ -26,24 +26,24 @@ DWORD concacaf_champions_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_rou
 
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 1, 14), year, Wednesday);
-		AddPlayoffFixture(pMem, fixture_id, Date(year, 2, 5), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, NoTiebreak_1, ExtraTimePenaltiesNoAwayGoals_2, 2, 22, 11, 22, 0, 0, 2, 14);
+		AddPlayoffFixture(pMem, fixture_id, Date(year, 2, 4), year, Wednesday, Evening);
+		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, NoTiebreak, Penalties | ExtraTime, 2, 22, 11, 22, 0, 0, 2, 14);
 
-		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 2, 27), year, Thursday);
-		AddPlayoffFixture(pMem, fixture_id, Date(year, 3, 5), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 0, NoTiebreak_1, ExtraTimePenaltiesNoAwayGoals_2, 2, 16, 8, 5, 22, 0, 2, 7);
+		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 2, 19), year, Thursday);
+		AddPlayoffFixture(pMem, fixture_id, Date(year, 3, 11), year, Wednesday, Evening);
+		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 0, NoTiebreak, Penalties | ExtraTime, 2, 16, 8, 5, 22, 0, 2, 7);
 
-		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 3, 13), year, Thursday);
-		AddPlayoffFixture(pMem, fixture_id, Date(year, 4, 2), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, NoTiebreak_1, ExtraTimePenaltiesNoAwayGoals_2, 2, 8, 4, 0, 0, 0, 2, 7);
+		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 3, 19), year, Thursday);
+		AddPlayoffFixture(pMem, fixture_id, Date(year, 4, 8), year, Wednesday, Evening);
+		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 0, NoTiebreak, Penalties | ExtraTime, 2, 8, 4, 0, 0, 0, 2, 7);
 
-		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 4, 10), year, Thursday);
-		AddPlayoffFixture(pMem, fixture_id, Date(year, 4, 23), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, NoTiebreak_1, ExtraTimePenaltiesNoAwayGoals_2, 2, 4, 2, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("concacaf_cl_semi_lose"));
+		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 4, 16), year, Thursday);
+		AddPlayoffFixture(pMem, fixture_id, Date(year, 4, 29), year, Wednesday, Evening);
+		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 0, NoTiebreak, Penalties | ExtraTime, 2, 4, 2, 0, 0, 0, 2, 7, 0, 0, prizeMoneyFile.GetInt("concacaf_cl_semi_lose"));
 
-		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 5, 1), year, Thursday);
-		AddPlayoffFixture(pMem, fixture_id, Date(year, 6, 1), year, Sunday, Afternoon, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, Final, 0, ExtraTimePenalties_1, NoTiebreak_2, 0, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("concacaf_cl_final_win"), prizeMoneyFile.GetInt("concacaf_cl_final_lose"));
+		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 5, 7), year, Thursday);
+		AddPlayoffFixture(pMem, fixture_id, Date(year, 5, 30), year, Saturday, Afternoon, NationalStadium);
+		FillFixtureDetails(pMem, fixture_id++, Final, 0, Penalties | ExtraTime, NoTiebreak, 0, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("concacaf_cl_final_win"), prizeMoneyFile.GetInt("concacaf_cl_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -360,7 +360,7 @@ void concacaf_champions_cup_all_teams(BYTE* _this) {
 		if (club->ClubEuroFlag == CONCACAF_CHAMPIONS_CUP_9CF()) {
 			BYTE seed = club->ClubEuroSeeding;
 			teams[teams_r1].club = club;
-			teams[teams_r1].f5 = 0 + 3 * seed;
+			teams[teams_r1].seeding = 9 - 6 * seed; // 0 = 9, 1 = 3
 			teams[teams_r1].f6 = 0;
 			teams_r1++;
 		}
@@ -380,19 +380,19 @@ void concacaf_champions_cup_qualifier_teams(BYTE* _this) {
 	DWORD count = 0;
 	DWORD total_count = data->special_nteams_seedings;
 	for (WORD i = 0; i < total_count; i++) {
-		char seed = qualifiers[i].f5;
+		char seed = qualifiers[i].seeding;
 		if (seed == 0) {
 			teams[count].club = qualifiers[i].club;
-			teams[count].f5 = 0;
+			teams[count].seeding = 0;
 			teams[count].f6 = 0;
 			count++;
 		}
 	}
 	for (WORD i = 0; i < total_count; i++) {
-		char seed = qualifiers[i].f5;
+		char seed = qualifiers[i].seeding;
 		if (seed == 3) {
 			teams[count].club = qualifiers[i].club;
-			teams[count].f5 = 1;
+			teams[count].seeding = 1;
 			teams[count].f6 = 0;
 			count++;
 		}
@@ -401,7 +401,6 @@ void concacaf_champions_cup_qualifier_teams(BYTE* _this) {
 
 char concacaf_champions_cup_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
@@ -451,7 +450,7 @@ void __declspec(naked) concacaf_champions_cup_update_c()
 	}
 }
 
-int concacaf_champions_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int concacaf_champions_cup_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
 	if (stage == -1) {
@@ -482,7 +481,7 @@ int concacaf_champions_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate, ch
 	return 0;
 }
 
-void __declspec(naked) concacaf_champions_cup_set_table_fate()
+void __declspec(naked) concacaf_champions_cup_table_fates_c()
 {
 	__asm
 	{
@@ -494,7 +493,7 @@ void __declspec(naked) concacaf_champions_cup_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call concacaf_champions_cup_set_fates
+		call concacaf_champions_cup_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -514,9 +513,9 @@ void concacaf_champions_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	data->promotes_to = -1;
 	data->relegates_to = -1;
 	data->f82 = 3;
-	data->max_bench = 7;
-	data->max_subs = 3;
-	data->rules = RulesSouthAmerica;
+	data->max_bench = 9;
+	data->max_subs = 5;
+	data->rules = RulesNorthAmerica;
 	data->f81 = 0xa;
 	*((BYTE*)(_this + 0xB1)) = 0;
 	int loaded = sub_51FC00(_this, 1);
@@ -527,9 +526,7 @@ void concacaf_champions_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	*((DWORD*)(_this + 0xA3)) = (DWORD)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0x3c, _this + 0x3a, 0);
 	cup_map_fixture_tree_518790(_this);
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	cup_reputation_setup_generic_5223A0(_this);
 }
@@ -539,6 +536,6 @@ void setup_concacaf_champions_cup()
 	WriteVTablePtr(concacaf_champions_cup_vtable, VTableEoSUpdate, (DWORD)&concacaf_champions_cup_update_c);
 	WriteVTablePtr(concacaf_champions_cup_vtable, VTableLeagueSplit, 0x51F890);
 	WriteVTablePtr(concacaf_champions_cup_vtable, VTableFixtures, (DWORD)&concacaf_champions_cup_fixture_caller);
-	WriteVTablePtr(concacaf_champions_cup_vtable, VTableTableFates, (DWORD)&concacaf_champions_cup_set_table_fate);
+	WriteVTablePtr(concacaf_champions_cup_vtable, VTableTableFates, (DWORD)&concacaf_champions_cup_table_fates_c);
 	WriteVTablePtr(concacaf_champions_cup_vtable, VTableSubsRounds, 0x858e70);
 }

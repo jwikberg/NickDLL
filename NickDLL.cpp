@@ -14,14 +14,12 @@
 #include "Structures\CMHeader.h"
 #include "Helpers\generic_functions.h"
 #include "Helpers\Helper.h"
-#include "Helpers\YearChanger.h"
 
-#include "inject_9cf_rename.h"
-#include "setup_misc_functions.h"
-#include <leagues_setup.h>
-#include <currency.h>
-#include <discipline_setup.h>
-#include <rules_setup.h>
+#include "Generic\inject_9cf_rename.h"
+#include "Generic\currency.h"
+#include "Generic\leagues_setup.h"
+#include "Generic\discipline_setup.h"
+#include "Generic\rules_setup.h"
 
 using namespace std;
 
@@ -71,52 +69,6 @@ void Setup()
 	WriteBytes(0x5448aa, 2, 0x00, 0x75);
 #endif 
 
-	///BEGIN add Windows 95 compatibility + run as admin
-	TCHAR exePath[MAX_PATH + 1];
-	DWORD len = GetModuleFileName(NULL, exePath, MAX_PATH);
-	if (len > 0) {
-		HKEY hKey;
-		LPCTSTR sk = TEXT("Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers");
-
-		LONG openRes = RegOpenKeyEx(
-			HKEY_CURRENT_USER,
-			sk,
-			0,
-			KEY_WRITE,
-			&hKey);
-
-		if (openRes == ERROR_SUCCESS) {
-			dprintf("Success opening key.\n");
-
-			//LPCTSTR value = exePath;
-			LPCTSTR data = TEXT("WIN95 RUNASADMIN\0");
-
-			LONG setRes = RegSetKeyValue(hKey, NULL, exePath, REG_SZ, (LPBYTE)data, (_tcslen(data) + 1) * sizeof(TCHAR));
-
-			if (setRes == ERROR_SUCCESS) {
-				dprintf("Success writing to registry.\n");
-
-				//RegDeleteKey(hKey, sk);
-
-				LONG closeOut = RegCloseKey(hKey);
-
-				if (closeOut == ERROR_SUCCESS) {
-					dprintf("Success closing key.\n");
-				}
-				else {
-					dprintf("Error closing key.\n");
-				}
-			}
-			else {
-				dprintf("Error writing to registry. %d\n", setRes);
-			}
-		}
-		else {
-			dprintf("Error opening key.\n");
-		}
-	}
-	///END
-
 	bool result = configFile.LoadConfig("NickDLL_config.json");
 	result = prizeMoneyFile.LoadConfig("NickDLL_prize_money.json");
 
@@ -142,8 +94,6 @@ void Setup()
 	setup_ger_nation();
 	dprintf("Applying Greece changes\n");
 	setup_gre_nation();
-	dprintf("Applying Holland changes\n");
-	setup_hol_nation();
 	if (strlen(configFile.GetValue("replaceIrelandWith", "")) == 0)
 	{
 		dprintf("Applying Ireland changes\n");
@@ -153,6 +103,8 @@ void Setup()
 	setup_ita_nation();
 	dprintf("Applying Japan changes\n");
 	setup_jpn_nation();
+	dprintf("Applying Netherlands changes\n");
+	setup_hol_nation();
 	if (strlen(configFile.GetValue("replaceNIrelandWith", "")) == 0)
 	{
 		dprintf("Applying Northern Ireland changes\n");
@@ -193,8 +145,14 @@ void Setup()
 	setup_cze_nation();
 	dprintf("New nation: Egypt\n");
 	setup_egy_nation();
+	dprintf("New nation: Iran\n");
+	setup_irn_nation();
+	dprintf("New nation: Morocco\n");
+	setup_mar_nation();
 	dprintf("New nation: Saudi Arabia\n");
 	setup_ksa_nation();
+	dprintf("New nation: Serbia\n");
+	setup_srb_nation();
 	dprintf("New nation: Switzerland\n");
 	setup_sui_nation();
 	dprintf("------------------------------\n");

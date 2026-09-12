@@ -7,7 +7,7 @@
 #include "Helpers\Helper.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 using namespace std;
 
@@ -16,7 +16,6 @@ vtable* fifa_intercontinental_cup_vtable = new vtable((BYTE*)0x971250, 0xA0);
 void fifa_intercontinental_cup_free_under(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	data->comp_vtable = (DWORD*)(fifa_intercontinental_cup_vtable->vtable_ptr);
-	DWORD x = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
 	}
@@ -51,7 +50,6 @@ void fifa_intercontinental_cup_free_under(BYTE* _this) {
 		sub_49F450((BYTE*)(data->f8));
 		sub_944C94_free((BYTE*)(data->f8));
 	}
-	DWORD y = -1;
 	sub_518690(_this);
 }
 
@@ -111,11 +109,11 @@ DWORD fifa_intercontinental_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 9, 9), year, Tuesday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 9, 14), year, Sunday, Evening, LargestStadium3);
 		AddPlayoffTVFixture(pMem, fixture_id, 0);
-		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, FixedTeamOrderInCup + ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 2, 0, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r1_lose"));
+		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, FixedTeamOrderInCup | Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 2, 0, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r1_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 9, 15), year, Monday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 9, 23), year, Tuesday, Evening, LargestStadium2);
-		FillFixtureDetails(pMem, fixture_id++, SecondRound, 0, FixedTeamOrderInCup + ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 1, 2, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r2_lose"));
+		FillFixtureDetails(pMem, fixture_id++, SecondRound, 0, FixedTeamOrderInCup | Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 1, 2, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r2_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -134,15 +132,15 @@ DWORD fifa_intercontinental_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 12, 3), year, Wednesday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 12, 10), year, Wednesday, Evening, LargestStadium2);
 		AddPlayoffTVFixture(pMem, fixture_id, 0);
-		FillFixtureDetails(pMem, fixture_id++, ThirdRound, 0, FixedTeamOrderInCup + ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 2, 0, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r3_lose"));
+		FillFixtureDetails(pMem, fixture_id++, ThirdRound, 0, FixedTeamOrderInCup | Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 2, 0, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_r3_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 12, 11), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 12, 13), year, Saturday, Evening, LargestStadium1);
-		FillFixtureDetails(pMem, fixture_id++, Playoff, 0, FixedTeamOrderInCup + ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 1, 2, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_playoff_lose"));
+		FillFixtureDetails(pMem, fixture_id++, Playoff, 0, FixedTeamOrderInCup | Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 1, 2, 0, 1, 0, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_playoff_lose"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 12, 14), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 12, 17), year, Wednesday, Evening, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, Final, 0, FixedTeamOrderInCup + ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 1, 3, 0, 1, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_final_win"), prizeMoneyFile.GetInt("fifa_intercontinental_cup_final_lose"));
+		FillFixtureDetails(pMem, fixture_id++, Final, 0, FixedTeamOrderInCup | Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 1, 3, 0, 1, 0, 0, prizeMoneyFile.GetInt("fifa_intercontinental_cup_final_win"), prizeMoneyFile.GetInt("fifa_intercontinental_cup_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -274,7 +272,7 @@ void fifa_intercontinental_cup_all_teams(BYTE* _this) {
 		club = clubs[0];
 	}
 	teams[count].club = club;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 	count++;
 
@@ -286,7 +284,7 @@ void fifa_intercontinental_cup_all_teams(BYTE* _this) {
 		club = clubs[0];
 	}
 	teams[count].club = club;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 	count++;
 
@@ -298,7 +296,7 @@ void fifa_intercontinental_cup_all_teams(BYTE* _this) {
 		club = clubs[0];
 	}
 	teams[count].club = club;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 	count++;
 
@@ -310,7 +308,7 @@ void fifa_intercontinental_cup_all_teams(BYTE* _this) {
 		club = clubs[0];
 	}
 	teams[count].club = club;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 	count++;
 
@@ -322,13 +320,13 @@ void fifa_intercontinental_cup_all_teams(BYTE* _this) {
 		club = clubs[0];
 	}
 	teams[count].club = club;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 	count++;
 
 	// empty slot, to be filled in later
 	teams[count].club = 0;
-	teams[count].f5 = 0;
+	teams[count].seeding = 0;
 	teams[count].f6 = 0;
 }
 
@@ -347,7 +345,7 @@ void fifa_intercontinental_cup_qualifier_teams(BYTE* _this) {
 	teams_seeded* qualifiers = (teams_seeded*)data->special_teams_seedings;
 	for (WORD i = 0; i < 3; i++) {
 		teams[i].club = qualifiers[abs(((year + 1) % 2) * 2 - i)].club;
-		teams[i].f5 = 0;
+		teams[i].seeding = 0;
 		teams[i].f6 = 0;
 	}
 }
@@ -369,7 +367,7 @@ void fifa_intercontinental_cup_final_stage_setup(BYTE* _this) {
 	teams_seeded* teams = (teams_seeded*)comp_data->special_teams_seedings;
 	WORD insert_idx = comp_data->special_nteams_seedings;
 	teams[insert_idx].club = club;
-	teams[insert_idx].f5 = 0;
+	teams[insert_idx].seeding = 0;
 	teams[insert_idx].f6 = 0;
 	comp_data->special_nteams_seedings++;
 	fifa_intercontinental_cup_reputation_setup(_this);
@@ -395,10 +393,12 @@ void fifa_intercontinental_cup_final_stage_setup(BYTE* _this) {
 	DWORD* stages_arr = comp_data->stages;
 	*((DWORD*)(&stages_arr[stage_num])) = (DWORD)new_stage;
 	sub_51C800(new_stage, 0);
+	sub_9452CA_free(pTeams);
+	sub_9452CA_free(pFixtures);
 	comp_data->current_stage = (long)stage_num;
 }
 
-int fifa_intercontinental_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int fifa_intercontinental_cup_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
 	BYTE* uecl_bytes = get_loaded_league(UEFA_CONFERENCE_LEAGUE_9CF());
@@ -449,7 +449,7 @@ int fifa_intercontinental_cup_set_fates(BYTE* _this, cm3_clubs* club, char fate,
 	return 0;
 }
 
-void __declspec(naked) fifa_intercontinental_cup_set_table_fate()
+void __declspec(naked) fifa_intercontinental_cup_table_fates_c()
 {
 	__asm
 	{
@@ -461,7 +461,7 @@ void __declspec(naked) fifa_intercontinental_cup_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call fifa_intercontinental_cup_set_fates
+		call fifa_intercontinental_cup_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -469,7 +469,6 @@ void __declspec(naked) fifa_intercontinental_cup_set_table_fate()
 
 char fifa_intercontinental_cup_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
 	if (data->special_teams_seedings) {
 		sub_9452CA_free(data->special_teams_seedings);
@@ -529,7 +528,7 @@ void __declspec(naked) fifa_intercontinental_cup_update_c()
 void fifa_intercontinental_cup_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
 	if (!data->f69) {
-		BYTE* cm_date = new BYTE[8];
+		BYTE cm_date[8];
 		convert_to_cm_date(cm_date, 21, June, data->year, -1);
 		WORD date_day = *(WORD*)(cm_date);
 		WORD date_year = *(WORD*)(cm_date + 2);
@@ -557,7 +556,7 @@ void fifa_intercontinental_cup_init2(BYTE* _this, DWORD current_date, int a3) {
 		}
 		// when starting in 2026
 		else if (liber_data->year != data->year) {
-			BYTE* cm_date = new BYTE[8];
+			BYTE cm_date[8];
 			convert_to_cm_date(cm_date, 1, December, data->year, -1);
 			WORD date_day = *(WORD*)(cm_date);
 			WORD date_year = *(WORD*)(cm_date + 2);
@@ -594,7 +593,7 @@ void fifa_intercontinental_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp
 	fifa_intercontinental_cup_vtable->SetPointer(VTableLeagueSplit, (DWORD)&fifa_intercontinental_cup_init2_c);
 	fifa_intercontinental_cup_vtable->SetPointer(VTableSetChampion, (DWORD)&fifa_intercontinental_cup_set_champion_c);
 	fifa_intercontinental_cup_vtable->SetPointer(VTableFixtures, (DWORD)&fifa_intercontinental_cup_fixture_caller);
-	fifa_intercontinental_cup_vtable->SetPointer(VTableTableFates, (DWORD)&fifa_intercontinental_cup_set_table_fate);
+	fifa_intercontinental_cup_vtable->SetPointer(VTableTableFates, (DWORD)&fifa_intercontinental_cup_table_fates_c);
 	fifa_intercontinental_cup_vtable->SetPointer(VTableReputationSetup, (DWORD)&fifa_intercontinental_cup_reputation_setup_c);
 	fifa_intercontinental_cup_vtable->SetPointer(VTableReputationCalc, (DWORD)&fifa_intercontinental_cup_reputation_calc_c);
 	data->competition_db = comp;
@@ -602,8 +601,8 @@ void fifa_intercontinental_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp
 	data->promotes_to = -1;
 	data->relegates_to = -1;
 	data->f82 = 3;
-	data->max_bench = 7;
-	data->max_subs = 3;
+	data->max_bench = 9;
+	data->max_subs = 5;
 	data->rules = RulesInternational;
 	data->f81 = 0xf;
 	*((BYTE*)(_this + 0xB1)) = 0;
@@ -618,9 +617,7 @@ void fifa_intercontinental_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp
 	*((DWORD*)(_this + 0xA3)) = (DWORD)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0x3c, _this + 0x3a, 0);
 	cup_map_fixture_tree_518790(_this);
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	data->f69 = 0;
 }

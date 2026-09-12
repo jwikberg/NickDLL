@@ -7,7 +7,7 @@
 #include "Helpers\Helper.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 using namespace std;
 
@@ -16,7 +16,6 @@ DWORD* world_cup_quals_conmebol_vtable = (DWORD*)0x970E2C;
 void world_cup_quals_conmebol_free_under(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	data->comp_vtable = world_cup_quals_conmebol_vtable;
-	DWORD x = 0;
 	sub_687970(_this, 0);
 	if (data->fixtures_table) {
 		sub_9452CA_free(data->fixtures_table);
@@ -41,7 +40,6 @@ void world_cup_quals_conmebol_free_under(BYTE* _this) {
 		sub_49F450((BYTE*)(data->f8));
 		sub_944C94_free((BYTE*)(data->f8));
 	}
-	DWORD y = -1;
 	sub_682300(_this);
 }
 
@@ -86,9 +84,9 @@ void world_cup_quals_conmebol_subs(BYTE* _this)
 	comp_data->promotes_to = -1;
 	comp_data->relegates_to = -1;
 
-	*((DWORD*)(_this + 0xA7)) = -1;
-	comp_data->max_bench = 7;
-	comp_data->max_subs = 3;
+	*((WORD*)(_this + 0xA7)) = -1;
+	comp_data->max_bench = 9;
+	comp_data->max_subs = 5;
 
 	DWORD v1 = *(DWORD*)_this;
 	comp_data->fixtures_table = (DWORD*)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0xA9, _this + 0x3A, 0);
@@ -116,7 +114,7 @@ DWORD world_cup_quals_conmebol_fixtures(BYTE* _this, char stage_idx, WORD* num_r
 			*a5 = 1;
 		BYTE* pMem = NULL;
 		WORD year = data->year;
-		WORD num_hosts = get_world_cup_hosts_in_continent(_this, SOUTH_AMERICA_9CF(), 0, 0);
+		WORD num_hosts = get_comp_hosts_in_continent(_this, FIFA_WORLD_CUP_9CF(), SOUTH_AMERICA_9CF(), 0, 0);
 		BYTE numberOfLeagueTeams = 10 - num_hosts;
 		*num_rounds = (numberOfLeagueTeams - 1 + numberOfLeagueTeams % 2) * data->n_rounds;
 		*stage_name_id = None;
@@ -124,48 +122,42 @@ DWORD world_cup_quals_conmebol_fixtures(BYTE* _this, char stage_idx, WORD* num_r
 		pMem = (BYTE*)cm0102_malloc(fixture_dates_sz * (*num_rounds));
 
 		int fixture_id = 0;
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year, 9, 7), year, Thursday, Afternoon);
 		int tv_id = 0;
-		AddFixture(pMem, fixture_id, Date(year, 9, 7), year, Thursday, Afternoon);
+		AddFixture(pMem, fixture_id, Date(year, 9, 23), year, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
-		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year, 9, 12), year, Tuesday, Afternoon);
-		AddFixtureNoTV(pMem, fixture_id++, Date(year, 10, 12), year, Thursday, Afternoon);
-		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year, 10, 17), year, Tuesday, Afternoon);
-		AddFixtureNoTV(pMem, fixture_id++, Date(year, 11, 16), year, Thursday, Afternoon);
-		AddFixtureNoTV(pMem, fixture_id++, Date(year, 11, 21), year, Tuesday, Afternoon);
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 9, 5), year, Thursday, Afternoon);
+		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year, 9, 26), year, Sunday, Afternoon);
+		AddFixtureNoTV(pMem, fixture_id++, Date(year, 9, 29), year, Wednesday, Afternoon);
+		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year, 10, 3), year, Sunday, Afternoon);
+		AddFixtureNoTV(pMem, fixture_id++, Date(year, 11, 9), year, Thursday, Afternoon);
+		AddFixtureNoTV(pMem, fixture_id++, Date(year, 11, 14), year, Tuesday, Afternoon);
 		tv_id = 0;
-		AddFixture(pMem, fixture_id, Date(year + 1, 9, 5), year, Thursday, Afternoon);
+		AddFixture(pMem, fixture_id, Date(year + 1, 9, 23), year, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
-		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 9, 10), year, Tuesday, Afternoon);
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 10, 10), year, Thursday, Afternoon);
+		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 9, 26), year, Sunday, Afternoon);
 		tv_id = 0;
-		AddFixture(pMem, fixture_id, Date(year + 1, 10, 10), year, Thursday, Afternoon);
-		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
+		AddFixture(pMem, fixture_id, Date(year + 1, 9, 29), year, Wednesday, Afternoon);
+		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
-		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 10, 15), year, Tuesday, Afternoon);
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 11, 14), year, Thursday, Afternoon);
+		if (numberOfLeagueTeams > 8) AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 10, 3), year, Sunday, Afternoon);
 		tv_id = 0;
 		AddFixture(pMem, fixture_id, Date(year + 1, 11, 14), year, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
 		AddFixtureNoTV(pMem, fixture_id++, Date(year + 1, 11, 19), year, Tuesday, Afternoon);
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 3, 20), year, Thursday, Afternoon);
 		tv_id = 0;
 		AddFixture(pMem, fixture_id, Date(year + 2, 3, 20), year, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
 		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 3, 25), year, Tuesday, Afternoon);
-		//AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 6, 5), year, Thursday, Afternoon);
 		tv_id = 0;
 		AddFixture(pMem, fixture_id, Date(year + 2, 6, 5), year, Thursday, Afternoon);
 		AddFixtureTV(pMem, fixture_id, tv_id++, 2, Friday, Afternoon);
 		AddFixtureTV(pMem, fixture_id++, tv_id++);
 		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 6, 10), year, Tuesday, Afternoon);
-		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 9, 4), year, Thursday, Afternoon);
-		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 9, 9), year, Tuesday, Afternoon);
+		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 9, 25), year, Thursday, Afternoon);
+		AddFixtureNoTV(pMem, fixture_id++, Date(year + 2, 9, 30), year, Tuesday, Afternoon);
 
 		return (DWORD)pMem;
 	}
@@ -190,10 +182,9 @@ void __declspec(naked) world_cup_quals_conmebol_fixture_caller()
 
 char world_cup_quals_conmebol_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	*((DWORD*)(_this + 0xA7)) = -1;
-	BYTE* ebx = 0;
+	*((WORD*)(_this + 0xA7)) = -1;
 	data->f76 = 0;
-	sub_687970(_this, ebx);
+	sub_687970(_this, 0);
 	if (data->fixtures_table) {
 		sub_9452CA_free(data->fixtures_table);
 		data->fixtures_table = 0;
@@ -238,10 +229,10 @@ void world_cup_quals_conmebol_teams(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	WORD year = data->year;
 
-	vector<cm3_clubs*> countries = get_national_teams_of_continent(SOUTH_AMERICA_9CF());
+	vector<cm3_clubs*> countries = get_national_teams_of_continent_fifa_members(SOUTH_AMERICA_9CF());
 
 	DWORD host1_id, host2_id;
-	WORD num_hosts = get_world_cup_hosts_in_continent(_this, SOUTH_AMERICA_9CF(), &host1_id, &host2_id);
+	WORD num_hosts = get_comp_hosts_in_continent(_this, FIFA_WORLD_CUP_9CF(), SOUTH_AMERICA_9CF(), &host1_id, &host2_id);
 	data->promotions -= num_hosts;
 	data->prom_playoff += (num_hosts > 0);
 	WORD total_teams_in_comp = (WORD)countries.size() - num_hosts;
@@ -260,7 +251,7 @@ void world_cup_quals_conmebol_teams(BYTE* _this) {
 	for (BYTE i = 0, j = 0; i < countries.size() && j < total_teams_in_comp; i++) {
 		if (countries[i]->ClubNation->NationID == host1_id || countries[i]->ClubNation->NationID == host2_id) continue;
 		teams[j].club = countries[i];
-		teams[j].f5 = 6;
+		teams[j].seeding = 6;
 		teams[j].f6 = 0;
 		add_team_call(_this, j++, countries[i], 0, 0);
 	}
@@ -278,7 +269,7 @@ void world_cup_quals_conmebol_init(BYTE* _this, WORD year, cm3_club_comps* comp)
 	data->relegates_to = WORLD_CUP_CAF_QUALIFYING_9CF();
 	data->rules = RulesInternational;
 	data->f82 = 3;
-	data->year = year;
+	data->year = year - 1;
 	while (data->year % 4 != 3) data->year++;
 	data->f81 = 0xf;
 	int loaded = sub_687B10(_this, 1);
@@ -288,13 +279,9 @@ void world_cup_quals_conmebol_init(BYTE* _this, WORD year, cm3_club_comps* comp)
 	data->f217 = 0x28;
 	data->current_stage = -1;
 	data->num_stages = 0;
-	//data->stages = (DWORD*)cm0102_malloc(data->num_stages * 4);
-	//world_cup_quals_conmebol_subs(_this);
-	BYTE* ebx = 0;
+	world_cup_quals_conmebol_subs(_this);
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	data->f69 = 0;
 }
@@ -302,7 +289,7 @@ void world_cup_quals_conmebol_init(BYTE* _this, WORD year, cm3_club_comps* comp)
 void world_cup_quals_conmebol_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
 	if (!data->f69) {
-		BYTE* cm_date = new BYTE[8];
+		BYTE cm_date[8];
 		convert_to_cm_date(cm_date, 26, July, data->year, -1);
 		WORD date_day = *(WORD*)(cm_date);
 		WORD date_year = *(WORD*)(cm_date + 2);
@@ -335,15 +322,13 @@ void __declspec(naked) world_cup_quals_conmebol_init2_c()
 	}
 }
 
-int world_cup_quals_conmebol_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int world_cup_quals_conmebol_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
-	BYTE* world_cup_bytes = get_loaded_league(FIFA_WORLD_CUP_9CF());
-	comp_stats* world_cup_data = (comp_stats*)world_cup_bytes;
 	if (stage == -1) {
 		switch (fate) {
 		case Qualified1:
-			add_team_to_world_cup(club);
+			qualify_team_for_international_comp(club, FIFA_WORLD_CUP_9CF());
 			return 0;
 		case TopPlayoff:
 			// has to be done separately
@@ -359,7 +344,7 @@ int world_cup_quals_conmebol_set_fates(BYTE* _this, cm3_clubs* club, char fate, 
 	return 0;
 }
 
-void __declspec(naked) world_cup_quals_conmebol_set_table_fate()
+void __declspec(naked) world_cup_quals_conmebol_table_fates_c()
 {
 	__asm
 	{
@@ -371,7 +356,7 @@ void __declspec(naked) world_cup_quals_conmebol_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call world_cup_quals_conmebol_set_fates
+		call world_cup_quals_conmebol_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -384,7 +369,14 @@ int world_cup_quals_conmebol_stage_news(BYTE* _this, int club_idx, char fate, ch
 	if (stage_id == -1) {
 		if (fate == Qualified1)
 		{
-			if (show_body_text) return sub_4B0B80(club_idx, round_data, a9, fate, a7, ret_str_ptr);
+			if (show_body_text) {
+				sub_66F4E0(0xDE1F64, 0xAD4D6C, club_data->ClubGenderNameShort, club_data->ClubGenderNameShort, comp_data->ClubCompGenderName, comp_data->ClubCompGenderName,
+					&club_data->ClubNameShort[0], &comp_data->ClubCompName[0]);
+				sub_4AE660(ret_str_ptr, 0xDE1F64);
+				sub_4AE8A0((BYTE*)ret_str_ptr, &club_data->ClubNameShort[0], 0x7d5, (DWORD)club_data);
+				sub_4AE8A0((BYTE*)ret_str_ptr, &comp_data->ClubCompName[0], 0x7d0, (DWORD)comp_data);
+				return 1;
+			}
 			else {
 				sub_66F4E0(0xDE1F64, 0xAD4B78, club_data->ClubGenderNameShort, club_data->ClubGenderNameShort, &club_data->ClubNameShort[0], &comp_data->ClubCompNameShort[0]);
 				sub_4AE660(ret_str_ptr, 0xDE1F64);
@@ -393,7 +385,12 @@ int world_cup_quals_conmebol_stage_news(BYTE* _this, int club_idx, char fate, ch
 			}
 		}
 		else if (fate == TopPlayoff) {
-			if (show_body_text) return sub_4B0B80(club_idx, round_data, a9, fate, a7, ret_str_ptr);
+			if (show_body_text) {
+				sub_66F4E0(0xDE1F64, (DWORD)&qualified_wc_playoff_msg[0], club_data->ClubGenderNameShort, club_data->ClubGenderNameShort, &club_data->ClubNameShort[0], &comp_data->ClubCompNameShort[0]);
+				sub_4AE660(ret_str_ptr, 0xDE1F64);
+				sub_4AE8A0((BYTE*)ret_str_ptr, &club_data->ClubNameShort[0], 0x7d5, (DWORD)club_data);
+				return 1;
+			}
 			else {
 				sub_66F4E0(0xDE1F64, 0xAD4BE0, club_data->ClubGenderNameShort, club_data->ClubGenderNameShort, &club_data->ClubNameShort[0], &comp_data->ClubCompNameShort[0]);
 				sub_4AE660(ret_str_ptr, 0xDE1F64);
@@ -464,15 +461,50 @@ void __declspec(naked) world_cup_quals_conmebol_landmarks_c()
 	}
 }
 
+WORD world_cup_quals_conmebol_vtable29(BYTE* _this, cm3_clubs* club) {
+	comp_stats* data = (comp_stats*)_this;
+	DWORD* f8 = data->f8;
+	WORD val = (WORD)sub_4A2E10((BYTE*)f8, club, 0x12);
+
+	BYTE cutoff1 = data->promotions + 1;
+	BYTE cutoff2 = data->promotions + data->prom_playoff + 1;
+	if (val < cutoff1) return -3;
+	else return -5;
+}
+
+void __declspec(naked) world_cup_quals_conmebol_vtable29_c()
+{
+	__asm
+	{
+		mov eax, esp
+		push dword ptr[eax + 0x4]
+		push ecx
+		call world_cup_quals_conmebol_vtable29
+		add esp, 0x8
+		ret 4
+	}
+}
+
 BYTE world_cup_quals_conmebol_vtable30(BYTE* _this, cm3_clubs* club) {
 	comp_stats* data = (comp_stats*)_this;
 	DWORD* f8 = data->f8;
 	BYTE bl = (BYTE)sub_4A2E10((BYTE*)f8, club, 0x13);
 	BYTE al = (BYTE)sub_4A2E10((BYTE*)f8, club, 0x12);
 
-	BYTE cutoff = data->promotions + data->prom_playoff;
-	if (al < cutoff) return (bl < cutoff) - 1;
-	else return bl < cutoff;
+	BYTE cutoff1 = data->promotions + 1;
+	BYTE cutoff2 = data->promotions + data->prom_playoff + 1;
+
+	if (al < cutoff1)
+	{
+		if (bl < cutoff1) return 1;
+		else return (bl < cutoff2) - 1;
+	}
+	else if (al < cutoff2)
+	{
+		if (bl < cutoff1) return 1;
+		else return (bl < cutoff2) - 1;
+	}
+	else return (bl < cutoff2) - 1;
 }
 
 void __declspec(naked) world_cup_quals_conmebol_vtable30_c()
@@ -492,15 +524,15 @@ void setup_world_cup_quals_conmebol() {
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableInitFree, (DWORD)&world_cup_quals_conmebol_free_c);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableEoSUpdate, (DWORD)&world_cup_quals_conmebol_update_c);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableLeagueSplit, (DWORD)&world_cup_quals_conmebol_init2_c);
-	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableTableFates, (DWORD)&world_cup_quals_conmebol_set_table_fate);
+	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableTableFates, (DWORD)&world_cup_quals_conmebol_table_fates_c);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableFixtures, (DWORD)&world_cup_quals_conmebol_fixture_caller);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableStageNews, (DWORD)&world_cup_quals_conmebol_stage_news_c);
-	//WriteVTablePtr(world_cup_quals_conmebol_vtable, VTable29, (DWORD)&world_cup_quals_conmebol_vtable29_c);
+	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTable29, (DWORD)&world_cup_quals_conmebol_vtable29_c);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTable30, (DWORD)&world_cup_quals_conmebol_vtable30_c);
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableClubLandmarks, (DWORD)&world_cup_quals_conmebol_landmarks_c);
 
-	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTable9, 0x48CEB0);
-	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTable10, 0x48CEA0);
+	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableLoadCompInfo, 0x48CEB0);
+	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableSaveCompInfo, 0x48CEA0);
 
 	WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableSubsRounds, (DWORD)&world_cup_quals_conmebol_subs_c);
 	//WriteVTablePtr(world_cup_quals_conmebol_vtable, VTableSetChampion, 0x519A90);

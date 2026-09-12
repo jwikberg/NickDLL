@@ -3,7 +3,7 @@
 #include "Helpers\generic_functions.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 DWORD* caf_super_cup_vtable = (DWORD*)0x9676C8;
 
@@ -22,7 +22,7 @@ DWORD caf_super_cup_fixtures(BYTE* _this, char stage_idx, WORD* num_rounds, WORD
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 6, 28), year, Wednesday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 10, 18), year, Saturday, Afternoon, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, None, 0, PenaltiesNoExtraTime_1, NoTiebreak_2, 6, 2, 1, 2, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("caf_super_final_win"), prizeMoneyFile.GetInt("caf_super_final_lose"));
+		FillFixtureDetails(pMem, fixture_id++, None, 0, Penalties, NoTiebreak, 6, 2, 1, 2, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("caf_super_final_win"), prizeMoneyFile.GetInt("caf_super_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -74,28 +74,15 @@ int caf_super_cup_teams(BYTE* _this) {
 	for (DWORD i = 0; i < vec.size(); i++)
 	{
 		teams[i].club = vec[i];
-		teams[i].f5 = 0;
+		teams[i].seeding = 0;
 		teams[i].f6 = 0;
 	}
 
 	return 1;
 }
 
-void __declspec(naked) caf_super_cup_teams_c()
-{
-	__asm
-	{
-		mov eax, esp
-		push ecx
-		call caf_super_cup_teams
-		add esp, 0x4
-		ret
-	}
-}
-
 char caf_super_cup_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
@@ -138,9 +125,35 @@ void __declspec(naked) caf_super_cup_update_c()
 	}
 }
 
+void caf_super_cup_init(BYTE* _this, WORD year, cm3_club_comps* comp)
+{
+	sub_518640(_this);
+	comp_stats* data = (comp_stats*)_this;
+	data->competition_db = comp;
+	data->comp_vtable = caf_super_cup_vtable;
+	data->year = year;
+	data->f171 = 0;
+	data->f68 = -1;
+	data->current_stage = -1;
+	data->num_stages = 0;
+	data->comp_type = CLUB_DOMESTIC;
+	data->max_bench = 9;
+	data->max_subs = 5;
+	data->rules = RulesAfrica;
+	*((BYTE*)(_this + 0xB1)) = 0;
+	int loaded = sub_51FC00(_this, 1);
+	if (loaded) return;
+	caf_super_cup_teams(_this);
+	DWORD v1 = *(DWORD*)_this;
+	*((DWORD*)(_this + 0xA3)) = (DWORD)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0x3c, _this + 0x3a, 0);
+	cup_map_fixture_tree_518790(_this);
+	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
+	sub_49EE70(pMem2, _this);
+	data->f8 = (DWORD*)pMem2;
+}
+
 void setup_caf_super_cup()
 {
 	WriteVTablePtr(caf_super_cup_vtable, VTableFixtures, (DWORD)&caf_super_cup_fixture_caller);
 	WriteVTablePtr(caf_super_cup_vtable, VTableEoSUpdate, (DWORD)&caf_super_cup_update_c);
-	PatchFunction(0x410a50, (DWORD)&caf_super_cup_teams_c);
 }

@@ -8,11 +8,8 @@
 
 #define SI_DOUBLE double
 
-#define START_YEAR 2025
-
-extern WORD FixedTeamOrderInCup;
-extern WORD FixedTeamOrderInCup2;
-extern WORD FixedTeamOrderInCup3;
+#define START_YEAR 2026
+#define VERSION "26/27 V1"
 
 enum CompetitionType : char {
 	CLUB_DOMESTIC = 1,
@@ -70,6 +67,11 @@ enum CompetitionRules : BYTE {
 	RulesSaudi,
 	RulesChile,
 	RulesEgypt,
+	RulesSerbia,
+	RulesNorthAmerica,
+	RulesAfrica,
+	RulesIran,
+	RulesMorocco,
 	CompetitionRules_LENGTH
 };
 
@@ -101,21 +103,21 @@ enum RoundNames : WORD {
 	ThirdPlacePlayoff = 0x8C,
 	Final = 0x96,
 	Playoff = 0xA0,
-	Playout = 0xBE,
+	ThirdRoundGroupD = 0xBE,
 	FirstPreliminaryRound = 0xC8,
 	SecondPreliminaryRound = 0xD2,
 	QualifyingRound = 0xDC,
 	PreliminaryRound = 0xE6,
-	PromotionFinal = 0xF0,
+	WestLeagueStage = 0xF0,
 	FirstQualifyingPhase = 0xFA,
 	SecondQualifyingPhase = 0x104,
 	ThirdQualifyingPhase = 0x10E,
-	Playoff1 = 0x118,
-	Playoff2 = 0x122,
+	ThirdRoundGroupE = 0x118,
+	ThirdRoundGroupF = 0x122,
 	EliminationFinal = 0x140,
 	KnockoutPlayoff = 0x14A,
-	MajorSemiFinal = 0x154,
-	PreliminaryFinal = 0x15E,
+	LeagueBFinals = 0x154,
+	LeagueCFinals = 0x15E,
 	GrandFinal = 0x168,
 	LeagueStage = 0x172,
 	NumericGroupStage = 0x3E9,
@@ -174,8 +176,10 @@ enum RoundNames : WORD {
 	SouthGotaland = 0x471,
 	SecondRoundGroupF = 0x472,
 	LeagueD1to2 = 0x473,
-	LeagueA1to6 = 0x475,
-	CentralConference = 0x47B,
+	LeagueA1to4 = 0x475,
+	LeagueABPlayoff = 0x479,
+	LeagueBCPlayoff = 0x47A,
+	EastLeagueStage = 0x47B,
 	RelegationGroupAtoB = 0x47C,
 	FourthRoundAlphabeticGroup = 0x47E,
 	East = 0x480,
@@ -184,29 +188,18 @@ enum RoundNames : WORD {
 	LeaguePath = 0x483
 };
 
-enum Game1Tiebreaks : WORD {
-	NoTiebreak_1 = 0,
-	PenaltiesNoExtraTime_1 = 1,
-	ExtraTimeNoPenalties_1 = 2,
-	ExtraTimePenalties_1 = 3,
-	Libertadores_1 = 4,
-	YardShootout_1 = 0x30,
-	GoldenGoal_1 = 0x83
-};
-
-enum Game2Tiebreaks : WORD {
-	NoTiebreak_2 = 0,
-	AwayGoalsPenaltiesNoExtraTime_2 = 1,
-	AwayGoalsExtraTimePenalties_2 = 3,
-	ExtraTimePenaltiesNoAwayGoals_2 = 7,
-	YardShootout_2 = 0x30,
-	GoldenGoal_2 = 0x83
-};
-
-enum Game3Tiebreaks : WORD {
-	NoTiebreak_3 = 0,
-	ExtraTimePenalties_3 = 3,
-	YardShootout_3 = 0x20
+enum CupTiebreaks : WORD {
+	NoTiebreak = 0x0,
+	Penalties = 0x1,
+	ExtraTime = 0x2,
+	NoAwayGoals = 0x4,
+	USBestOf3 = 0x10,
+	YardShootout = 0x20,
+	GoldenGoal = 0x80,
+	FixedTeamOrderInCup = 0x200, // not sure how these work
+	FixedTeamOrderInCup2 = 0x300, // not sure how these work
+	FixedTeamOrderInCup3 = 0x400, // not sure how these work
+	HigherSeedingTiebreak = 0x800
 };
 
 enum StadiumType {
@@ -237,6 +230,24 @@ enum ClubStatus : char {
 	Professional = 1,
 	SemiProfessional = 2,
 	Amateur = 3
+};
+
+enum NationActualRegion : char {
+	NotSet,
+	Africa,
+	Asia,
+	Caribbean,
+	CentralAmerica,
+	CentralEurope,
+	EasternEurope,
+	MiddleEast,
+	NorthAfrica,
+	NorthAmerica,
+	Oceania,
+	Scandinavia,
+	SouthAmerica,
+	SouthernEurope,
+	UKandIreland,
 };
 
 typedef struct cm3_continents CM3_CONTINENTS;
@@ -278,7 +289,7 @@ struct cm3_names
 struct cm3_players
 {
 	// original data
-	long StaffPlayerID;
+	DWORD StaffPlayerID;
 	char StaffPlayerSquadNumber;
 	short StaffPlayerCurrentAbility;
 	short StaffPlayerPotentialAbility;
@@ -348,7 +359,7 @@ struct cm3_players
 #pragma pack(push, 1)
 struct cm3_non_players
 {
-	long StaffNonPlayerID;
+	DWORD StaffNonPlayerID;
 	short StaffNonPlayerCurrentAbility;
 	short StaffNonPlayerPotentialAbility;
 	short StaffNonPlayerHomeReputation; // Version 0x02 - Changed char->short
@@ -390,7 +401,7 @@ struct cm3_non_players
 #pragma pack(push, 1)
 struct cm3_staff_preferences
 {
-	long StaffPreferencesID;
+	DWORD StaffPreferencesID;
 	CM3_CLUBS* StaffFavouriteClubs1;
 	CM3_CLUBS* StaffFavouriteClubs2;
 	CM3_CLUBS* StaffFavouriteClubs3;
@@ -409,7 +420,7 @@ struct cm3_staff_preferences
 #pragma pack(push, 1)
 struct cm3_staff
 {
-	long StaffID;
+	DWORD StaffID;
 	CM3_NAMES* StaffFirstName;
 	CM3_NAMES* StaffSecondName;
 	CM3_NAMES* StaffCommonName;
@@ -453,7 +464,7 @@ struct cm3_staff
 struct cm3_continents
 {
 	// original data
-	long ContinentID;
+	DWORD ContinentID;
 	char ContinentName[SHORT_TXT_LENGTH];
 	char ContinentGenderName;
 	char ContinentNameThreeLetter[4];
@@ -470,7 +481,7 @@ struct cm3_continents
 struct cm3_nations
 {
 	// original data
-	long NationID;
+	DWORD NationID;
 	char NationName[STANDARD_TXT_LENGTH];
 	char NationGenderName;
 	char NationNameShort[SHORT_TXT_LENGTH];
@@ -529,7 +540,7 @@ struct cm3_nations
 struct cm3_cities
 {
 	// original data
-	long CityID;
+	DWORD CityID;
 	char CityName[SHORT_TXT_LENGTH];
 	char CityGenderName;
 	CM3_NATIONS* CityNation;
@@ -544,7 +555,7 @@ struct cm3_cities
 #pragma pack(push, 1)
 struct cm3_colours
 {
-	long ColourID;
+	DWORD ColourID;
 	char ColourName[STANDARD_TXT_LENGTH];
 	unsigned char ColourRedIntensity;
 	unsigned char ColourGreenIntensity;
@@ -556,7 +567,7 @@ struct cm3_colours
 struct cm3_stadiums
 {
 	// original data
-	long StadiumID;
+	DWORD StadiumID;
 	char StadiumName[STANDARD_TXT_LENGTH];
 	char StadiumGenderName;
 	CM3_CITIES* StadiumCity;
@@ -586,7 +597,7 @@ struct cm3_stadiums
 struct cm3_clubs
 {
 	// original data
-	long ClubID;
+	DWORD ClubID;
 	char ClubName[STANDARD_TXT_LENGTH];
 	char ClubGenderName;
 	char ClubNameShort[SHORT_TXT_LENGTH];
@@ -645,7 +656,7 @@ struct cm3_clubs
 #pragma pack(push, 1)
 struct cm3_club_comps
 {
-	long ClubCompID;
+	DWORD ClubCompID;
 	char ClubCompName[STANDARD_TXT_LENGTH];
 	char ClubCompGenderName;
 	char ClubCompNameShort[SHORT_TXT_LENGTH];
@@ -664,7 +675,7 @@ struct cm3_club_comps
 #pragma pack(push, 1)
 struct cm3_club_comp_history
 {
-	long ClubCompHistoryID;
+	DWORD ClubCompHistoryID;
 	CM3_CLUB_COMPS* ClubCompHistoryClubComp;
 	short ClubCompHistoryYear;
 	CM3_CLUBS* ClubCompHistoryWinners;
@@ -677,7 +688,7 @@ struct cm3_club_comp_history
 #pragma pack(push, 1)
 struct cm3_staff_comps
 {
-	long StaffCompID;
+	DWORD StaffCompID;
 	char StaffCompName[STANDARD_TXT_LENGTH];
 	char StaffCompGenderName;
 	char StaffCompNameShort[SHORT_TXT_LENGTH];
@@ -693,7 +704,7 @@ struct cm3_staff_comps
 #pragma pack(push, 1)
 struct cm3_staff_comp_history
 {
-	long StaffCompHistoryID;
+	DWORD StaffCompHistoryID;
 	CM3_STAFF_COMPS* StaffCompHistoryStaffComp;
 	short StaffCompHistoryYear;
 	char* StaffCompHistoryFirstPlacedFirstName;
@@ -784,7 +795,7 @@ typedef struct COMP_STATS
 typedef struct TEAMS_SEEDED
 {
 	CM3_CLUBS* club;
-	char f5;
+	char seeding;
 	char f6;
 } teams_seeded;
 #pragma pack(pop)
@@ -862,12 +873,12 @@ typedef struct PLAYABLE_NATION_DATA
 	WORD contract_start_day; // 50
 	BYTE contract_start_month; // 52
 	WORD contract_start_year; // 53
-	WORD f55; // 55
+	WORD contract_start_day_of_week; // 55
 	BYTE end_date[8]; // 57
 	WORD contract_end_day; // 65
 	BYTE contract_end_month; // 67
 	WORD contract_end_year; // 68
-	WORD f70; // 70
+	WORD contract_end_day_of_week; // 70
 
 	PLAYABLE_NATION_DATA()
 	{
@@ -888,12 +899,12 @@ typedef struct PLAYABLE_NATION_DATA
 		contract_start_day = 0;
 		contract_start_month = 0;
 		contract_start_year = 0;
-		f55 = 0;
+		contract_start_day_of_week = 0;
 		for (int i = 0; i < 8; i++) end_date[i] = 0;
 		contract_end_day = 0;
 		contract_end_month = 0;
 		contract_end_year = 0;
-		f70 = 0;
+		contract_end_day_of_week = 0;
 	}
 } playable_nation_data;
 #pragma pack(pop)
@@ -975,7 +986,7 @@ typedef struct MATCH_DATA
 	WORD main_stage_id;
 	WORD fixture_number;
 	WORD f54_0xdb;
-	WORD f56_0xab;
+	WORD tiebreaks;
 	BYTE f58_0xc4;
 	BYTE f59;
 	BYTE f60;
@@ -997,6 +1008,24 @@ typedef struct MATCH_DATA
 	BYTE f76;
 	WORD subs;
 } match_data;
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+typedef struct TRANSFER_WINDOW
+{
+	BYTE idx_1;
+	BYTE window_num_1;
+	BYTE start_day_of_week;
+	BYTE start_day;
+	BYTE start_month;
+	BYTE is_start_1;
+	BYTE idx_2;
+	BYTE window_num_2;
+	BYTE end_day_of_week;
+	BYTE end_day;
+	BYTE end_month;
+	BYTE is_start_2;
+} transfer_window;
 #pragma pack(pop)
 
 enum LeagueFates : char {

@@ -3,7 +3,7 @@
 #include "Structures\CMHeader.h"
 #include "Helper.h"
 #include "constants.h"
-#include <currency.h>
+#include "Generic\currency.h"
 
 // Generic function that will add teams to a league competition
 int AddTeams(BYTE* _this)
@@ -11,18 +11,21 @@ int AddTeams(BYTE* _this)
 	comp_stats* comp_data = (comp_stats*)_this;
 	DWORD CompID = comp_data->competition_db->ClubCompID;
 
-	// Count the number of teams first, as the code really expects us to know up front
-	WORD numberOfLeagueTeams = CountNumberOfTeamsInComp(CompID);
-
-	// Now let's add the teams
-	comp_data->n_teams = numberOfLeagueTeams; // number of teams
-	comp_data->team_league_table = (DWORD*)cm0102_malloc(numberOfLeagueTeams * league_team_list_sz); // number of teams * 59 (0x3B)
-	BYTE teamsAdded = 0;
+	vector<cm3_clubs*> teams;
 	for (DWORD i = 0; i < *clubs_count; i++)
 	{
 		cm3_clubs* club = &(*clubs)[i];
 		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID)
-			add_team_call(_this, teamsAdded++, club, 0, 0);
+			teams.push_back(club);
+	}
+
+	// Now let's add the teams
+	comp_data->n_teams = (WORD)teams.size(); // number of teams
+	comp_data->team_league_table = (DWORD*)cm0102_malloc(comp_data->n_teams * league_team_list_sz); // number of teams * 59 (0x3B)
+	BYTE teamsAdded = 0;
+	for (cm3_clubs* club : teams)
+	{
+		add_team_call(_this, teamsAdded++, club, 0, 0);
 	}
 	return 1;
 }
@@ -33,18 +36,21 @@ int AddTeamsReserveDivision(BYTE* _this)
 	comp_stats* comp_data = (comp_stats*)_this;
 	DWORD CompID = comp_data->competition_db->ClubCompID;
 
-	// Count the number of teams first, as the code really expects us to know up front
-	WORD numberOfLeagueTeams = CountNumberOfTeamsInReserveComp(CompID);
-
-	// Now let's add the teams
-	comp_data->n_teams = numberOfLeagueTeams; // number of teams
-	comp_data->team_league_table = (DWORD*)cm0102_malloc(numberOfLeagueTeams * league_team_list_sz); // number of teams * 59 (0x3B)
-	BYTE teamsAdded = 0;
+	vector<cm3_clubs*> teams;
 	for (DWORD i = 0; i < *clubs_count; i++)
 	{
 		cm3_clubs* club = &(*clubs)[i];
 		if (club->ClubReserveDivision && club->ClubReserveDivision->ClubCompID == CompID)
-			add_team_call(_this, teamsAdded++, club, 0, 0);
+			teams.push_back(club);
+	}
+
+	// Now let's add the teams
+	comp_data->n_teams = (WORD)teams.size(); // number of teams
+	comp_data->team_league_table = (DWORD*)cm0102_malloc(comp_data->n_teams * league_team_list_sz); // number of teams * 59 (0x3B)
+	BYTE teamsAdded = 0;
+	for (cm3_clubs* club : teams)
+	{
+		add_team_call(_this, teamsAdded++, club, 0, 0);
 	}
 	return 1;
 }
@@ -55,19 +61,22 @@ int AddTeamsGroupLeague(BYTE* _this, DWORD first_group_id)
 	comp_stats* comp_data = (comp_stats*)_this;
 	DWORD CompID = comp_data->competition_db->ClubCompID;
 
-	// Count the number of teams first, as the code really expects us to know up front
-	WORD numberOfLeagueTeams = CountNumberOfTeamsInCompWithGroup(CompID, first_group_id);
-
-	// Now let's add the teams
-	comp_data->n_teams = numberOfLeagueTeams; // number of teams
-	comp_data->team_league_table = (DWORD*)cm0102_malloc(numberOfLeagueTeams * league_team_list_sz); // number of teams * 59 (0x3B)
-	BYTE teamsAdded = 0;
+	vector<cm3_clubs*> teams;
 	for (DWORD i = 0; i < *clubs_count; i++)
 	{
 		cm3_clubs* club = &(*clubs)[i];
 		if (club->ClubDivision && club->ClubDivision->ClubCompID == CompID
 			&& club->ClubReserveDivision && club->ClubReserveDivision->ClubCompID == first_group_id)
-			add_team_call(_this, teamsAdded++, club, 0, 0);
+			teams.push_back(club);
+	}
+
+	// Now let's add the teams
+	comp_data->n_teams = (WORD)teams.size(); // number of teams
+	comp_data->team_league_table = (DWORD*)cm0102_malloc(comp_data->n_teams * league_team_list_sz); // number of teams * 59 (0x3B)
+	BYTE teamsAdded = 0;
+	for (cm3_clubs* club : teams)
+	{
+		add_team_call(_this, teamsAdded++, club, 0, 0);
 	}
 	return 1;
 }

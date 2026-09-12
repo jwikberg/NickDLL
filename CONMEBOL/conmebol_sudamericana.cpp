@@ -7,7 +7,7 @@
 #include "Helpers\Helper.h"
 #include "Structures\vtable.h"
 #include "Helpers\constants.h"
-#include <Helpers\9cf_constants.h>
+#include "Helpers\9cf_constants.h"
 
 using namespace std;
 
@@ -60,7 +60,6 @@ void __declspec(naked) sudam_money_after_match_c()
 void conmebol_sudamericana_free_under(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
 	data->comp_vtable = conmebol_sudamericana_vtable;
-	DWORD x = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
 	}
@@ -95,7 +94,6 @@ void conmebol_sudamericana_free_under(BYTE* _this) {
 		sub_49F450((BYTE*)(data->f8));
 		sub_944C94_free((BYTE*)(data->f8));
 	}
-	DWORD y = -1;
 	sub_518690(_this);
 }
 
@@ -134,7 +132,7 @@ DWORD conmebol_sudamericana_fixtures(BYTE* _this, char stage_idx, WORD* num_roun
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 1, 5), year, Sunday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 3, 5), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, FixedTeamOrderInCup + PenaltiesNoExtraTime_1, NoTiebreak_2, 8, 32, 16, 32, 0, 0, 1, 0, prizeMoneyFile.GetInt("conmebol_sudam_r1_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, FirstRound, 0, FixedTeamOrderInCup | Penalties, NoTiebreak, 8, 32, 16, 32, 0, 0, 1, 0, prizeMoneyFile.GetInt("conmebol_sudam_r1_qualify"));
 
 		return (DWORD)pMem;
 	}
@@ -183,7 +181,7 @@ DWORD conmebol_sudamericana_fixtures(BYTE* _this, char stage_idx, WORD* num_roun
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 5, 29), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 7, 16), year, Wednesday, Evening);
 		AddPlayoffTVFixture(pMem, fixture_id, 0);
-		FillFixtureDetails(pMem, fixture_id++, KnockoutPlayoff, 8, FixedTeamOrderInCup + Libertadores_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 16, 8, 16, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_ko_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, KnockoutPlayoff, 8, FixedTeamOrderInCup | NoAwayGoals, Penalties | NoAwayGoals, 8, 16, 8, 16, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_ko_qualify"));
 
 		return (DWORD)pMem;
 	}
@@ -200,19 +198,19 @@ DWORD conmebol_sudamericana_fixtures(BYTE* _this, char stage_idx, WORD* num_roun
 		int fixture_id = 0;
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 7, 24), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 8, 13), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 8, FixedTeamOrderInCup + Libertadores_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 16, 8, 16, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_r16_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, RoundOf16, 8, FixedTeamOrderInCup | NoAwayGoals, Penalties | NoAwayGoals, 8, 16, 8, 16, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_r16_qualify"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 8, 21), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 9, 17), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 8, FixedTeamOrderInCup + Libertadores_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 8, 4, 0, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_qtr_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, QuarterFinal, 8, FixedTeamOrderInCup | NoAwayGoals, Penalties | NoAwayGoals, 8, 8, 4, 0, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_qtr_qualify"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 9, 25), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 10, 22), year, Wednesday, Evening);
-		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 8, FixedTeamOrderInCup + Libertadores_1, AwayGoalsPenaltiesNoExtraTime_2, 8, 4, 2, 0, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_semi_qualify"));
+		FillFixtureDetails(pMem, fixture_id++, SemiFinal, 8, FixedTeamOrderInCup | NoAwayGoals, Penalties | NoAwayGoals, 8, 4, 2, 0, 0, 0, 2, 7, prizeMoneyFile.GetInt("conmebol_sudam_semi_qualify"));
 
 		AddPlayoffDrawFixture(pMem, fixture_id, Date(year, 10, 29), year, Thursday);
 		AddPlayoffFixture(pMem, fixture_id, Date(year, 11, 22), year, Saturday, Afternoon, NationalStadium);
-		FillFixtureDetails(pMem, fixture_id++, Final, 0, ExtraTimePenalties_1, NoTiebreak_2, 8, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("conmebol_sudam_final_win"), prizeMoneyFile.GetInt("conmebol_sudam_final_lose"));
+		FillFixtureDetails(pMem, fixture_id++, Final, 0, Penalties | ExtraTime, NoTiebreak, 8, 2, 1, 0, 0, 0, 1, 0, 0, prizeMoneyFile.GetInt("conmebol_sudam_final_win"), prizeMoneyFile.GetInt("conmebol_sudam_final_lose"));
 
 		return (DWORD)pMem;
 	}
@@ -385,7 +383,7 @@ void sudam_team_selection() {
 		}
 		size_t max_count = required + 2 - j;
 		if (max_count > clubs.size()) max_count = clubs.size();
-		for (; j < required; j++) {
+		for (; j < required && max_count > 0; j++) {
 			int idx = 0;
 			if (!playable) idx = rand() % max_count;
 			cm3_clubs* conmebol_club = clubs[idx];
@@ -402,7 +400,6 @@ void sudam_team_selection() {
 			conmebol_club->ClubEuroSeeding = curr_seeding;
 			clubs.erase(clubs.begin() + idx);
 			max_count--;
-			if (max_count < 1) break;
 		}
 		if (j < required) {
 			for (; j < required; j++) {
@@ -452,13 +449,13 @@ void conmebol_sudamericana_all_teams(BYTE* _this) {
 			BYTE seed = club->ClubEuroSeeding;
 			if (seed == 1 && teams_r1 < 12) {
 				teams[teams_r1].club = club;
-				teams[teams_r1].f5 = 7;
+				teams[teams_r1].seeding = 7;
 				teams[teams_r1].f6 = 0;
 				teams_r1++;
 			}
 			else if (seed == 2 && teams_r2 < 32) {
 				teams[teams_r2 + 12].club = club;
-				teams[teams_r2 + 12].f5 = 13;
+				teams[teams_r2 + 12].seeding = 13;
 				teams[teams_r2 + 12].f6 = 0;
 				teams_r2++;
 			}
@@ -481,13 +478,13 @@ void conmebol_sudamericana_qualifier_teams(BYTE* _this) {
 
 	vector<cm3_clubs*> qual_clubs;
 	for (WORD i = 0; i < total_count; i++) {
-		char seed = qualifiers[i].f5;
+		char seed = qualifiers[i].seeding;
 		if (seed == 13) {
 			qual_clubs.push_back(qualifiers[i].club);
 			count++;
 		}
 	}
-	sort(qual_clubs.begin(), qual_clubs.end(), compareClubNation);
+	sort(qual_clubs.begin(), qual_clubs.end(), compareClubNationID);
 	shuffle(qual_clubs.begin(), qual_clubs.begin() + 4, rng);
 	shuffle(qual_clubs.begin() + 4, qual_clubs.begin() + 8, rng);
 	shuffle(qual_clubs.begin() + 8, qual_clubs.begin() + 12, rng);
@@ -499,7 +496,7 @@ void conmebol_sudamericana_qualifier_teams(BYTE* _this) {
 
 	for (WORD i = 0; i < qual_clubs.size(); i++) {
 		teams[i].club = qual_clubs[i];
-		teams[i].f5 = i % 2;
+		teams[i].seeding = i % 2;
 		teams[i].f6 = 0;
 	}
 }
@@ -612,7 +609,6 @@ void __declspec(naked) conmebol_sudamericana_reputation_calc_c()
 
 char conmebol_sudamericana_update(BYTE* _this) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* ebx = 0;
 	data->f76 = 0;
 	if (data->teams_list) {
 		sub_9452CA_free(data->teams_list);
@@ -682,8 +678,8 @@ void conmebol_sudamericana_group_stage_setup(BYTE* _this) {
 	comp_stats* comp_data = (comp_stats*)_this;
 	DWORD* stages_arr = comp_data->stages;
 
-	BYTE prom_rel[4] = { 1, 1, 0, 0 };
-	BYTE tiebreaks[4] = { GoalDifferenceTiebreaker, GoalsForTiebreaker, GoalsForAwayTiebreaker, NoTiebreaker };
+	char prom_rel[4] = { 1, 1, 0, 0 };
+	char tiebreaks[4] = { GoalDifferenceTiebreaker, GoalsForTiebreaker, GoalsForAwayTiebreaker, NoTiebreaker };
 
 	vector<cm3_clubs*> clubs;
 	teams_seeded* teams = (teams_seeded*)comp_data->special_teams_seedings;
@@ -758,7 +754,7 @@ void conmebol_sudamericana_playoff_stage_setup(BYTE* _this) {
 		sort_second.push_back(t);
 		WORD insert_idx = comp_data->special_nteams_seedings;
 		teams[insert_idx].club = t.club;
-		teams[insert_idx].f5 = 3;
+		teams[insert_idx].seeding = 3;
 		teams[insert_idx].f6 = 0;
 		comp_data->special_nteams_seedings++;
 		t.club->ClubEuroFlag = COPA_SUDAMERICANA_9CF();
@@ -796,6 +792,8 @@ void conmebol_sudamericana_playoff_stage_setup(BYTE* _this) {
 	DWORD* stages_arr = comp_data->stages;
 	*((DWORD*)(&stages_arr[stage_num])) = (DWORD)new_stage;
 	sub_51C800(new_stage, 0);
+	sub_9452CA_free(pTeams);
+	sub_9452CA_free(pFixtures);
 	comp_data->current_stage = (long)stage_num;
 
 	for (char al = 0; al < 8; al++) {
@@ -846,7 +844,7 @@ void conmebol_sudamericana_final_stage_setup(BYTE* _this) {
 		cm3_clubs* club2 = sort_second[j].club;
 		*((DWORD*)(&pTeams[j * 2])) = (DWORD)club2;
 		*((DWORD*)(&pTeams[j * 2 + 1])) = (DWORD)club1;
-		team_order[j * 2] = sort_second[j].f5;
+		team_order[j * 2] = sort_second[j].seeding;
 		team_order[j * 2 + 1] = first_seed[j];
 	}
 
@@ -863,6 +861,8 @@ void conmebol_sudamericana_final_stage_setup(BYTE* _this) {
 	DWORD* stages_arr = comp_data->stages;
 	*((DWORD*)(&stages_arr[stage_num])) = (DWORD)new_stage;
 	sub_51C800(new_stage, 0);
+	sub_9452CA_free(pTeams);
+	sub_9452CA_free(pFixtures);
 	comp_data->current_stage = (long)stage_num;
 }
 
@@ -906,7 +906,7 @@ void __declspec(naked) conmebol_sudamericana_stages_create_c()
 	}
 }
 
-int conmebol_sudamericana_set_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
+int conmebol_sudamericana_table_fates(BYTE* _this, cm3_clubs* club, char fate, char stage, BYTE* a5, BYTE* round_data, int a7) {
 	BYTE* staff_hist_ptr = (BYTE*)*staff_history;
 	comp_stats* comp_data = (comp_stats*)_this;
 	if (stage == -1) {
@@ -990,7 +990,7 @@ int conmebol_sudamericana_set_fates(BYTE* _this, cm3_clubs* club, char fate, cha
 	return 0;
 }
 
-void __declspec(naked) conmebol_sudamericana_set_table_fate()
+void __declspec(naked) conmebol_sudamericana_table_fates_c()
 {
 	__asm
 	{
@@ -1002,7 +1002,7 @@ void __declspec(naked) conmebol_sudamericana_set_table_fate()
 		push dword ptr[eax + 0x8]
 		push dword ptr[eax + 0x4]
 		push ecx
-		call conmebol_sudamericana_set_fates
+		call conmebol_sudamericana_table_fates
 		add esp, 0x1c
 		ret 0x18
 	}
@@ -1102,8 +1102,8 @@ void conmebol_sudamericana_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	data->promotes_to = -1;
 	data->relegates_to = -1;
 	data->f82 = 3;
-	data->max_bench = 7;
-	data->max_subs = 3;
+	data->max_bench = 9;
+	data->max_subs = 5;
 	data->rules = RulesSouthAmerica;
 	data->f81 = 0xa;
 	*((BYTE*)(_this + 0xB1)) = 0;
@@ -1120,9 +1120,7 @@ void conmebol_sudamericana_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 	*((DWORD*)(_this + 0xA3)) = (DWORD)(*(int(__thiscall**)(BYTE*, int, BYTE*, BYTE*, DWORD))(v1 + 0x3C))(_this, -1, _this + 0x3c, _this + 0x3a, 0);
 	cup_map_fixture_tree_518790(_this);
 	BYTE* pMem2 = (BYTE*)cm0102_new(0x5CE);
-	BYTE unk1 = 1;
 	sub_49EE70(pMem2, _this);
-	unk1 = 0;
 	data->f8 = (DWORD*)pMem2;
 	conmebol_sudamericana_reputation_setup(_this);
 }
@@ -1135,7 +1133,7 @@ void setup_conmebol_sudamericana() {
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableSetChampion, (DWORD)&conmebol_sudamericana_set_champion_c);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableClubLandmarks, 0x48cab0); // review? -> 586fa0
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableFixtures, (DWORD)&conmebol_sudamericana_fixture_caller);
-	WriteVTablePtr(conmebol_sudamericana_vtable, VTableTableFates, (DWORD)&conmebol_sudamericana_set_table_fate);
+	WriteVTablePtr(conmebol_sudamericana_vtable, VTableTableFates, (DWORD)&conmebol_sudamericana_table_fates_c);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableStageNews, (DWORD)&sudam_stage_news_c);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableReputationSetup, (DWORD)&conmebol_sudamericana_reputation_setup_c);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableReputationCalc, (DWORD)&conmebol_sudamericana_reputation_calc_c);
@@ -1144,8 +1142,8 @@ void setup_conmebol_sudamericana() {
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTableLeagueSplit, 0x51F890);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTable7, 0x51FC00);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTable8, 0x5210F0);
-	WriteVTablePtr(conmebol_sudamericana_vtable, VTable9, 0x48CEB0);
-	WriteVTablePtr(conmebol_sudamericana_vtable, VTable10, 0x48CEA0);
+	WriteVTablePtr(conmebol_sudamericana_vtable, VTableLoadCompInfo, 0x48CEB0);
+	WriteVTablePtr(conmebol_sudamericana_vtable, VTableSaveCompInfo, 0x48CEA0);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTable17, 0x519690);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTable22, 0x5221F0);
 	WriteVTablePtr(conmebol_sudamericana_vtable, VTable33, 0x522910);
