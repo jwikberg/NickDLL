@@ -371,7 +371,8 @@ void euro_champ_quals_create_league_a_matchups(BYTE* _this, BYTE* stage, vector<
 
 	for (BYTE m = 0; m < 6; m++) {
 		BYTE* ptr_last = (BYTE*)(pFixtures + fixture_dates_sz * 5);
-		match_data* match = new match_data();
+		match_data match_storage = {};
+		match_data* match = &match_storage;
 		match->comp_id = data->competition_db->ClubCompID;
 		match->f8 = -1;
 		match->comp = data->competition_db;
@@ -551,7 +552,8 @@ void euro_champ_quals_setup_groups_b(BYTE* _this, BYTE idx) {
 
 		for (BYTE m = 0; m < 6; m++) {
 			BYTE* ptr_last = (BYTE*)(pFixtures + fixture_dates_sz * 5);
-			match_data* match = new match_data();
+			match_data match_storage = {};
+			match_data* match = &match_storage;
 			match->comp_id = data->competition_db->ClubCompID;
 			match->f8 = -1;
 			match->comp = data->competition_db;

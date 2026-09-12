@@ -870,7 +870,8 @@ void afc_champions_league_elite_group_stage_setup(BYTE* _this) {
 
 		for (BYTE m = 0; m < num_rounds; m++) {
 			BYTE* ptr_last = (BYTE*)(pFixtures + fixture_dates_sz * 7);
-			match_data* match = new match_data();
+			match_data match_storage = {};
+			match_data* match = &match_storage;
 			match->comp_id = comp_data->competition_db->ClubCompID;
 			match->f8 = -1;
 			match->comp = comp_data->competition_db;

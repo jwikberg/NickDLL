@@ -129,7 +129,8 @@ void aus_league_setup_extra_games(BYTE* _this) {
 
 	for (BYTE m = 0; m < 4; m++) {
 		BYTE* ptr_last = (BYTE*)(pFixtures + fixture_dates_sz * 3);
-		match_data* match = new match_data();
+		match_data match_storage = {};
+		match_data* match = &match_storage;
 		match->comp_id = data->competition_db->ClubCompID;
 		match->f8 = -1;
 		match->comp = data->competition_db;
