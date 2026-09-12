@@ -850,8 +850,8 @@ bool compareClubNationRep(cm3_nations* n1, cm3_nations* n2)
 bool compareClubAFCElite(cm3_clubs* c1, cm3_clubs* c2)
 {
 	if (!c1->ClubNation || !c2->ClubNation) return compareClubRep(c1, c2);
-	vector<DWORD> asia_west = west_asia_nations();
-	vector<DWORD> asia_east = east_asia_nations();
+	static const vector<DWORD> asia_west = west_asia_nations();
+	static const vector<DWORD> asia_east = east_asia_nations();
 	int c1_west = distance(asia_west.begin(), find(asia_west.begin(), asia_west.end(), c1->ClubNation->NationID));
 	int c2_west = distance(asia_west.begin(), find(asia_west.begin(), asia_west.end(), c2->ClubNation->NationID));
 	int c1_east = distance(asia_east.begin(), find(asia_east.begin(), asia_east.end(), c1->ClubNation->NationID));
@@ -869,7 +869,7 @@ bool compareClubAsiaWestEast(cm3_clubs* c1, cm3_clubs* c2)
 {
 	bool c1_west = false, c2_west = false;
 	if (!c1->ClubNation || !c2->ClubNation) return compareClubLongitude(c1, c2);
-	vector<DWORD> asia_west = west_asia_nations();
+	static const vector<DWORD> asia_west = west_asia_nations();
 	c1_west = find(asia_west.begin(), asia_west.end(), c1->ClubNation->NationID) != asia_west.end();
 	c2_west = find(asia_west.begin(), asia_west.end(), c2->ClubNation->NationID) != asia_west.end();
 	if (c1_west != c2_west) return c1_west;
@@ -878,44 +878,36 @@ bool compareClubAsiaWestEast(cm3_clubs* c1, cm3_clubs* c2)
 
 cm3_clubs* get_last_comp_winner(cm3_club_comps* comp)
 {
-	vector<cm3_club_comp_history*> ret;
+	cm3_club_comp_history* latest = nullptr;
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		if ((*club_comp_histories)[i].ClubCompHistoryClubComp == comp)
+		cm3_club_comp_history* hist = &(*club_comp_histories)[i];
+		if (hist->ClubCompHistoryClubComp == comp &&
+			(!latest || hist->ClubCompHistoryYear > latest->ClubCompHistoryYear))
 		{
-			cm3_club_comp_history* hist = &(*club_comp_histories)[i];
-			ret.push_back(hist);
+			latest = hist;
 		}
 	}
-	if (ret.size() < 1) return nullptr;
-	sort(ret.begin(), ret.end(), [](const cm3_club_comp_history* h1, const cm3_club_comp_history* h2)
-		{
-			return h1->ClubCompHistoryYear > h2->ClubCompHistoryYear;
-		});
-	return ret[0]->ClubCompHistoryWinners;
+	return latest ? latest->ClubCompHistoryWinners : nullptr;
 }
 
 cm3_clubs* get_last_comp_runner_up(cm3_club_comps* comp)
 {
-	vector<cm3_club_comp_history*> ret;
+	cm3_club_comp_history* latest = nullptr;
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		if ((*club_comp_histories)[i].ClubCompHistoryClubComp == comp)
+		cm3_club_comp_history* hist = &(*club_comp_histories)[i];
+		if (hist->ClubCompHistoryClubComp == comp &&
+			(!latest || hist->ClubCompHistoryYear > latest->ClubCompHistoryYear))
 		{
-			cm3_club_comp_history* hist = &(*club_comp_histories)[i];
-			ret.push_back(hist);
+			latest = hist;
 		}
 	}
-	if (ret.size() < 1) return nullptr;
-	sort(ret.begin(), ret.end(), [](const cm3_club_comp_history* h1, const cm3_club_comp_history* h2)
-		{
-			return h1->ClubCompHistoryYear > h2->ClubCompHistoryYear;
-		});
-	return ret[0]->ClubCompHistoryRunnersUp;
+	return latest ? latest->ClubCompHistoryRunnersUp : nullptr;
 }
 
 cm3_clubs* get_last_comp_winner_by_year(cm3_club_comps* comp, WORD year)
 {
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		cm3_club_comp_history hist = (*club_comp_histories)[i];
+		cm3_club_comp_history& hist = (*club_comp_histories)[i];
 		if (hist.ClubCompHistoryClubComp == comp && hist.ClubCompHistoryYear == year)
 		{
 			return hist.ClubCompHistoryWinners;
@@ -927,7 +919,7 @@ cm3_clubs* get_last_comp_winner_by_year(cm3_club_comps* comp, WORD year)
 cm3_clubs* get_last_comp_runner_up_by_year(cm3_club_comps* comp, WORD year)
 {
 	for (DWORD i = 0; i < *club_comp_histories_count; i++) {
-		cm3_club_comp_history hist = (*club_comp_histories)[i];
+		cm3_club_comp_history& hist = (*club_comp_histories)[i];
 		if (hist.ClubCompHistoryClubComp == comp && hist.ClubCompHistoryYear == year)
 		{
 			return hist.ClubCompHistoryRunnersUp;
@@ -1035,7 +1027,7 @@ vector<cm3_clubs*> get_relegated_teams(DWORD compID)
 	return relegated_clubs;
 }
 
-bool sortTLS(team_league_stats s1, team_league_stats s2)
+bool sortTLS(const team_league_stats& s1, const team_league_stats& s2)
 {
 	if (s1.points != s2.points) return s1.points > s2.points;
 	int diff1 = s1.goals_for - s1.goals_against;
@@ -1046,13 +1038,13 @@ bool sortTLS(team_league_stats s1, team_league_stats s2)
 	return s1.club->ClubReputation > s2.club->ClubReputation;
 }
 
-bool sortTeamSeeding(teams_seeded s1, teams_seeded s2)
+bool sortTeamSeeding(const teams_seeded& s1, const teams_seeded& s2)
 {
 	if (s1.seeding != s2.seeding) return s1.seeding < s2.seeding;
 	return s1.club->ClubReputation > s2.club->ClubReputation;
 }
 
-vector<cm3_clubs*> weighted_reservoir_sampling(vector<cm3_clubs*> population, unsigned int sample_size) {
+vector<cm3_clubs*> weighted_reservoir_sampling(const vector<cm3_clubs*>& population, unsigned int sample_size) {
 	unsigned int i = 0;
 	vector<cm3_clubs*> reservoir;
 	if (sample_size < 1) return reservoir;
@@ -1075,7 +1067,7 @@ vector<cm3_clubs*> weighted_reservoir_sampling(vector<cm3_clubs*> population, un
 	return reservoir;
 }
 
-vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(vector<cm3_clubs*> population, unsigned int sample_size) {
+vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(const vector<cm3_clubs*>& population, unsigned int sample_size) {
 	unsigned int i = 0;
 	vector<cm3_clubs*> reservoir;
 	if (sample_size < 1) return reservoir;
@@ -1098,12 +1090,12 @@ vector<cm3_clubs*> weighted_reservoir_sampling_invert_weights(vector<cm3_clubs*>
 	return reservoir;
 }
 
-vector<cm3_clubs*> get_random_weighted_clubs(vector<cm3_clubs*> list, unsigned int amount, bool to_promote) {
+vector<cm3_clubs*> get_random_weighted_clubs(const vector<cm3_clubs*>& list, unsigned int amount, bool to_promote) {
 	if (to_promote) return weighted_reservoir_sampling(list, amount);
 	else return weighted_reservoir_sampling_invert_weights(list, amount);
 }
 
-vector<cm3_clubs*> get_random_weighted_national_teams(vector<cm3_clubs*> population, unsigned int sample_size) {
+vector<cm3_clubs*> get_random_weighted_national_teams(const vector<cm3_clubs*>& population, unsigned int sample_size) {
 	unsigned int i = 0;
 	vector<cm3_clubs*> reservoir;
 	if (sample_size < 1) return reservoir;
