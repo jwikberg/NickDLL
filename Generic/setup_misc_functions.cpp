@@ -802,24 +802,26 @@ void update_fifa_coefficients(BYTE* _this, BYTE* match_data) {
 	else goals_away = *(char*)(match_data + 0x48);
 
 	int importance = 10;
+	bool final_rounds = is_final_knockout_rounds(main_stage_id, sub_stage_id);
+	bool continental_finals = is_continental_finals(comp);
 	// if Nations League && group stage, importance = 15
 	// if Nations League && playoffs, importance = 25
 	if (comp->ClubCompID == UEFA_NATIONS_LEAGUE_9CF() || comp->ClubCompID == CONCACAF_NATIONS_LEAGUE_9CF()) {
-		if (is_final_knockout_rounds(main_stage_id, sub_stage_id)) importance = 25;
+		if (final_rounds) importance = 25;
 		else importance = 15;
 	}
 	// if World Cup qualifiers or confederation qualifiers, importance = 25
 	if (is_continental_qualifiers(comp)) importance = 25;
 	// if confederation finals (before quarter-finals), importance = 35
 	// if confederation finals (quarter-finals and later), importance = 40
-	if (is_continental_finals(comp)) {
-		if (is_final_knockout_rounds(main_stage_id, sub_stage_id)) importance = 40;
+	if (continental_finals) {
+		if (final_rounds) importance = 40;
 		else importance = 30;
 	}
 	// if World Cup (before quarter-finals), importance = 50
 	// if World Cup (quarter-finals and later), importance = 60
 	if (comp->ClubCompID == FIFA_WORLD_CUP_9CF()) {
-		if (is_final_knockout_rounds(main_stage_id, sub_stage_id)) importance = 60;
+		if (final_rounds) importance = 60;
 		else importance = 50;
 	}
 	float result_home = 0;
@@ -839,8 +841,9 @@ void update_fifa_coefficients(BYTE* _this, BYTE* match_data) {
 	float rating_away = getFIFARankingPoints(away_team->ClubNation);
 	float diff = rating_home - rating_away;
 	// 1 divided by (10 ^ -(rating_diff / 600) + 1)
-	float expected_home = (float)(1 / (pow(10, -diff / 600) + 1));
-	float expected_away = (float)(1 / (pow(10, diff / 600) + 1));
+	double expected_factor = pow(10, -diff / 600);
+	float expected_home = (float)(1 / (expected_factor + 1));
+	float expected_away = (float)(expected_factor / (expected_factor + 1));
 
 	// full formula: P = Pbefore + I * (W - We)
 	// check if World Cup or main continental comp, and if knockout rounds, don't lower rating
@@ -848,7 +851,7 @@ void update_fifa_coefficients(BYTE* _this, BYTE* match_data) {
 	if (new_rating_home < 0) new_rating_home = 0;
 	float new_rating_away = rating_away + importance * (result_away - expected_away);
 	if (new_rating_away < 0) new_rating_away = 0;
-	if (is_continental_finals(comp) && is_final_knockout_rounds(main_stage_id, sub_stage_id))
+	if (continental_finals && final_rounds)
 	{
 		if (new_rating_home < rating_home) new_rating_home = rating_home;
 		if (new_rating_away < rating_away) new_rating_away = rating_away;
