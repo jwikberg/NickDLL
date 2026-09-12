@@ -1108,7 +1108,7 @@ static int(__thiscall* sub_54BA20) (BYTE* _this, char* a2, __int16 a3, char a4) 
 (int(__thiscall*)(BYTE * _this, char* a2, __int16 a3, char a4))(0x54BA20);
 void print_country_date_info_start(playable_nation_data* pnd, char* ret_str) {
 	BYTE* start_date = pnd->start_date;
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	sub_549EF0(cm_date, *(WORD*)(start_date)-28, *(WORD*)(start_date + 2));
 	char* date_str = new char[96];
 	sub_54BA20(cm_date, date_str, 0x7d0, -1);

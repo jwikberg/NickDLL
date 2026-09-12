@@ -38,7 +38,7 @@ DWORD caf_club_setup_c(playable_nation_data* nation_data) {
 	caf_super_cup_init(pMem, *current_year, get_comp(CAF_SUPER_CUP_9CF()));
 	nation_comps[i++] = (DWORD)pMem;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 21, June, START_YEAR, -1);
 	nation_data->update_day = *(WORD*)cm_date;
 	nation_data->update_year = *current_year;

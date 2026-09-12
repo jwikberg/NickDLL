@@ -221,7 +221,7 @@ char eng_awards_2(BYTE* _this, DWORD current_date) {
 	DWORD nation = *(DWORD*)(_this + 0xE);
 	BYTE selected = ((cm3_nations*)nation)->NationLeagueSelected;
 	DWORD* awards_list = (DWORD*)*(DWORD*)(_this + 0x4);
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 5, April, *(WORD*)(current_date + 2), -1);
 	WORD date_day = *(WORD*)(cm_date);
 	WORD date_year = *(WORD*)(cm_date + 2);
@@ -239,7 +239,7 @@ char eng_awards_2(BYTE* _this, DWORD current_date) {
 			yearly_team_award_nominate_7698F0(_this, ENG_CONFERENCE_SOUTH_9CF(), awards_list[43]);
 		}
 	}
-	cm_date = new BYTE[8];
+
 	convert_to_cm_date(cm_date, 30, May, *(WORD*)(current_date + 2), -1);
 	date_day = *(WORD*)(cm_date);
 	date_year = *(WORD*)(cm_date + 2);

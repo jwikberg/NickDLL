@@ -118,7 +118,7 @@ char ita_awards_2(BYTE* _this, DWORD current_date) {
 	DWORD nation = *(DWORD*)(_this + 0xE);
 	BYTE selected = ((cm3_nations*)nation)->NationLeagueSelected;
 	DWORD* awards_list = (DWORD*)*(DWORD*)(_this + 0x4);
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 10, June, *(WORD*)(current_date + 2), -1);
 	WORD date_day = *(WORD*)(cm_date);
 	WORD date_year = *(WORD*)(cm_date + 2);

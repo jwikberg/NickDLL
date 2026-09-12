@@ -123,7 +123,7 @@ void uefa_nations_league_subs(BYTE* _this)
 	comp_data->max_bench = 9;
 	comp_data->max_subs = 5;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 10, May, comp_data->year, Sunday);
 	*((WORD*)(_this + 0xB6)) = *(WORD*)(cm_date);
 	*((WORD*)(_this + 0xB8)) = 0;
@@ -885,7 +885,7 @@ void uefa_nations_league_best_placed_update(BYTE* _this) {
 	WORD num_rounds;
 	WORD stage_name_id;
 	BYTE* pFixtures = (BYTE*)uefa_nations_league_fixtures(_this, -1, &num_rounds, &stage_name_id, 0);
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	sub_549EF0(cm_date, *(WORD*)(pFixtures), year + *(WORD*)(pFixtures + 2));
 	sub_417C10((BYTE*)start_date, tmp1, cm_date);
 	sub_549EF0(cm_date, *(WORD*)(pFixtures + num_rounds * fixture_dates_sz - fixture_dates_sz),

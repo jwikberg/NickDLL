@@ -65,7 +65,7 @@ DWORD por_setup_c(playable_nation_data* nation_data) {
 	pMem = (BYTE*)cm0102_new(0xB2);
 	por_super_init(pMem, *current_year, get_comp(POR_SUPER_CUP_9CF()));
 	nation_comps[i++] = (DWORD)pMem;
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 20, June, START_YEAR, -1);
 	nation_data->update_day = *(WORD*)cm_date;
 	nation_data->update_year = *current_year;

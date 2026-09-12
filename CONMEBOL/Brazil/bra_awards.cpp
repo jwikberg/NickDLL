@@ -297,7 +297,7 @@ void __declspec(naked) bra_awards_c()
 char bra_awards_2(BYTE* _this, DWORD current_date) {
 	DWORD nation = *(DWORD*)(_this + 0xE);
 	DWORD* awards_list = (DWORD*)*(DWORD*)(_this + 0x4);
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 1, April, *(WORD*)(current_date + 2), -1);
 	WORD date_day = *(WORD*)(cm_date);
 	WORD date_year = *(WORD*)(cm_date + 2);
@@ -309,7 +309,7 @@ char bra_awards_2(BYTE* _this, DWORD current_date) {
 			yearly_player_award_nominate_768CF0(_this, state_leagues[i], current_date, awards_list[18 + (i * 4)], -1, 1, 17, -1, -1, -1, -1);
 		}
 	}
-	cm_date = new BYTE[8];
+
 	convert_to_cm_date(cm_date, 16, December, *(WORD*)(current_date + 2), -1);
 	date_day = *(WORD*)(cm_date);
 	date_year = *(WORD*)(cm_date + 2);

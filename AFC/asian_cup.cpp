@@ -68,7 +68,7 @@ void asian_cup_subs(BYTE* _this)
 	data->max_bench = 9;
 	data->max_subs = 5;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 9, May, data->year - 1, Saturday);
 	*((WORD*)(_this + 0xB6)) = *(WORD*)(cm_date);
 	*((WORD*)(_this + 0xB8)) = -1;
@@ -381,7 +381,7 @@ void asian_cup_best_placed_update(BYTE* _this) {
 
 	WORD year = data->year;
 	BYTE* ba = (BYTE*)data->fixtures_table;
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	sub_549EF0(cm_date, *(WORD*)(ba)-3, year + *(WORD*)(ba + 2));
 	sub_417C10((BYTE*)start_date, tmp1, cm_date);
 	WORD a9 = *(WORD*)(_this + 0xA9);

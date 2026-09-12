@@ -281,7 +281,7 @@ void gold_cup_quals_qualifier_teams(BYTE* _this) {
 void gold_cup_quals_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
 	if (!data->f69) {
-		BYTE* cm_date = new BYTE[8];
+		BYTE cm_date[8];
 		convert_to_cm_date(cm_date, 11, October, data->year, Monday);
 		WORD date_day = *(WORD*)(cm_date);
 		WORD date_year = *(WORD*)(cm_date + 2);
@@ -412,7 +412,7 @@ void gold_cup_quals_stages_create(BYTE* _this) {
 	if (current < max - 1) {
 		current++;
 		if (current == 0) {
-			BYTE* cm_date = new BYTE[8];
+			BYTE cm_date[8];
 			convert_to_cm_date(cm_date, 25, November, comp_data->year, Wednesday);
 			WORD date_day = *(WORD*)(cm_date);
 			WORD date_year = *(WORD*)(cm_date + 2);

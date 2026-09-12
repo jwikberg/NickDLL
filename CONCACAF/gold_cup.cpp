@@ -117,7 +117,7 @@ void gold_cup_subs(BYTE* _this)
 	data->max_bench = 9;
 	data->max_subs = 5;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 17, April, data->year, Thursday);
 	*((WORD*)(_this + 0xB6)) = *(WORD*)(cm_date);
 	*((WORD*)(_this + 0xB8)) = 0;

@@ -12,7 +12,7 @@
 DWORD* kor_rules_vtable = (DWORD*)0x96CFEC;
 
 DWORD kor_setup_c(playable_nation_data* nation_data) {
-	BYTE* start_date = new BYTE[8];
+	BYTE start_date[8];
 	sub_54C770((BYTE*)dd6ec8, start_date, 4);
 	WORD start_year = *(WORD*)(start_date + 2);
 
@@ -47,7 +47,7 @@ DWORD kor_setup_c(playable_nation_data* nation_data) {
 	kor_super_init(pMem, start_year, get_comp(KOR_SUPER_CUP_9CF()));
 	nation_comps[i++] = (DWORD)pMem;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 1, January, START_YEAR, -1);
 	nation_data->update_day = *(WORD*)cm_date;
 	nation_data->update_year = start_year;

@@ -686,11 +686,11 @@ void world_cup_quals_uefa_best_placed_update(BYTE* _this) {
 
 	WORD year = data->year;
 	BYTE* ba = (BYTE*)data->fixtures_table;
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	sub_549EF0(cm_date, *(WORD*)(ba), year + *(WORD*)(ba + 2));
 	sub_417C10((BYTE*)start_date, tmp1, cm_date);
 	WORD a9 = *(WORD*)(_this + 0xA9);
-	cm_date = new BYTE[8];
+
 	sub_549EF0(cm_date, *(WORD*)(ba + a9 * fixture_dates_sz - fixture_dates_sz),
 		year + *(WORD*)(ba + a9 * fixture_dates_sz - fixture_dates_sz + 2));
 	sub_54C770(cm_date, (BYTE*)tmp1, 1);
@@ -787,7 +787,7 @@ void world_cup_quals_uefa_init(BYTE* _this, WORD year, cm3_club_comps* comp) {
 
 void world_cup_quals_uefa_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 26, July, data->year, -1);
 	WORD date_day = *(WORD*)(cm_date);
 	WORD date_year = *(WORD*)(cm_date + 2);

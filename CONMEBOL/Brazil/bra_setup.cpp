@@ -56,7 +56,7 @@ DWORD bra_setup_c(playable_nation_data* nation_data) {
 		BRA_PERNAMBUCO_LOWER_9CF(),
 	};
 
-	BYTE* start_date = new BYTE[8];
+	BYTE start_date[8];
 	sub_54C770((BYTE*)dd6ec8, start_date, 4);
 	WORD start_year = *(WORD*)(start_date + 2);
 	
@@ -147,7 +147,7 @@ DWORD bra_setup_c(playable_nation_data* nation_data) {
 	bra_super_init(pMem, start_year, get_comp(BRA_CHAMPIONS_CUP_9CF()));
 	nation_comps[i++] = (DWORD)pMem;
 
-	BYTE* cm_date = new BYTE[8];
+	BYTE cm_date[8];
 	convert_to_cm_date(cm_date, 1, January, START_YEAR, -1);
 	nation_data->update_day = *(WORD*)cm_date;
 	nation_data->update_year = start_year;

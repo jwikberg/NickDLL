@@ -528,7 +528,7 @@ void __declspec(naked) fifa_intercontinental_cup_update_c()
 void fifa_intercontinental_cup_init2(BYTE* _this, DWORD current_date, int a3) {
 	comp_stats* data = (comp_stats*)_this;
 	if (!data->f69) {
-		BYTE* cm_date = new BYTE[8];
+		BYTE cm_date[8];
 		convert_to_cm_date(cm_date, 21, June, data->year, -1);
 		WORD date_day = *(WORD*)(cm_date);
 		WORD date_year = *(WORD*)(cm_date + 2);
@@ -556,7 +556,7 @@ void fifa_intercontinental_cup_init2(BYTE* _this, DWORD current_date, int a3) {
 		}
 		// when starting in 2026
 		else if (liber_data->year != data->year) {
-			BYTE* cm_date = new BYTE[8];
+			BYTE cm_date[8];
 			convert_to_cm_date(cm_date, 1, December, data->year, -1);
 			WORD date_day = *(WORD*)(cm_date);
 			WORD date_year = *(WORD*)(cm_date + 2);
