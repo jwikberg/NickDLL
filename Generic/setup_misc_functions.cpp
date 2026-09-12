@@ -46,6 +46,64 @@ vector<DWORD> special_mexico = {};
 vector<DWORD> special_portugal = {};
 vector<DWORD> arab = {};
 
+struct naturalization_nation_data {
+	BYTE years;
+	BYTE never;
+	BYTE commonwealth;
+	BYTE hispanic_american;
+	BYTE caribbean;
+	BYTE central_america;
+	BYTE special_spain;
+	BYTE special_mexico;
+	BYTE special_portugal;
+	BYTE arab;
+};
+
+vector<naturalization_nation_data> naturalization_lookup;
+
+void initialize_naturalization_lookup()
+{
+	naturalization_nation_data default_policy = {};
+	naturalization_lookup.assign(*nations_count, default_policy);
+
+	auto set_flag = [](const vector<DWORD>& nation_ids, BYTE naturalization_nation_data::*field) {
+		for (DWORD nation_id : nation_ids) {
+			if (nation_id < naturalization_lookup.size())
+				naturalization_lookup[nation_id].*field = 1;
+		}
+	};
+	auto set_years = [](const vector<DWORD>& nation_ids, BYTE years) {
+		for (DWORD nation_id : nation_ids) {
+			if (nation_id < naturalization_lookup.size() && naturalization_lookup[nation_id].years == 0)
+				naturalization_lookup[nation_id].years = years;
+		}
+	};
+
+	set_flag(naturalize_never, &naturalization_nation_data::never);
+	set_years(naturalize_2_years, 2);
+	set_years(naturalize_3_years, 3);
+	set_years(naturalize_4_years, 4);
+	set_years(naturalize_6_years, 6);
+	set_years(naturalize_7_years, 7);
+	set_years(naturalize_8_years, 8);
+	set_years(naturalize_9_years, 9);
+	set_years(naturalize_10_years, 10);
+	set_years(naturalize_12_years, 12);
+	set_years(naturalize_14_years, 14);
+	set_years(naturalize_15_years, 15);
+	set_years(naturalize_20_years, 20);
+	set_years(naturalize_25_years, 25);
+	set_years(naturalize_40_years, 40);
+	set_flag(commonwealth, &naturalization_nation_data::commonwealth);
+	set_flag(hispanic_american, &naturalization_nation_data::hispanic_american);
+	set_flag(caribbean, &naturalization_nation_data::caribbean);
+	set_flag(central_america, &naturalization_nation_data::central_america);
+	set_flag(special_spain, &naturalization_nation_data::special_spain);
+	set_flag(special_mexico, &naturalization_nation_data::special_mexico);
+	set_flag(special_portugal, &naturalization_nation_data::special_portugal);
+	set_flag(arab, &naturalization_nation_data::arab);
+}
+
 static WORD(*rgb_to_word_5E4800)(unsigned char a1, unsigned char a2, unsigned char a3, DWORD* a4) =
 (WORD(*)(unsigned char a1, unsigned char a2, unsigned char a3, DWORD * a4))(0x5E4800);
 
@@ -134,7 +192,7 @@ int show_extra_leagues_in_start(BYTE* nation, DWORD dest_ptr, int a3) {
 		return 1;
 	}
 	if (cm3_nation->NationID == NATION_SPAIN_9CF()) {
-		league_str = "Segunda Federación";
+		league_str = "Segunda Federaci\xF3n";
 		sub_66F4E0(dest_ptr, (DWORD)&league_str[0]);
 		return 1;
 	}
@@ -327,86 +385,77 @@ void player_gain_nationality() {
 			}
 		}
 		DWORD club_nation_id = club_nation->NationID;
-		if (vector_contains_element(naturalize_never, club_nation_id)) continue;
+		const naturalization_nation_data* club_policy =
+			club_nation_id < naturalization_lookup.size() ? &naturalization_lookup[club_nation_id] : nullptr;
+		if (club_policy && club_policy->never) continue;
 		// don't try to naturalize players in the UK+Ireland, this is done somewhere else?
 		if (club_nation->NationActualRegion == UKandIreland) continue;
-		WORD min_years = 5;
-		if (vector_contains_element(naturalize_2_years, club_nation_id)) min_years = 2;
-		else if (vector_contains_element(naturalize_3_years, club_nation_id)) min_years = 3;
-		else if (vector_contains_element(naturalize_4_years, club_nation_id)) min_years = 4;
-		else if (vector_contains_element(naturalize_6_years, club_nation_id)) min_years = 6;
-		else if (vector_contains_element(naturalize_7_years, club_nation_id)) min_years = 7;
-		else if (vector_contains_element(naturalize_8_years, club_nation_id)) min_years = 8;
-		else if (vector_contains_element(naturalize_9_years, club_nation_id)) min_years = 9;
-		else if (vector_contains_element(naturalize_10_years, club_nation_id)) min_years = 10;
-		else if (vector_contains_element(naturalize_12_years, club_nation_id)) min_years = 12;
-		else if (vector_contains_element(naturalize_14_years, club_nation_id)) min_years = 14;
-		else if (vector_contains_element(naturalize_15_years, club_nation_id)) min_years = 15;
-		else if (vector_contains_element(naturalize_20_years, club_nation_id)) min_years = 20;
-		else if (vector_contains_element(naturalize_25_years, club_nation_id)) min_years = 25;
-		else if (vector_contains_element(naturalize_40_years, club_nation_id)) min_years = 40;
+		WORD min_years = club_policy && club_policy->years ? club_policy->years : 5;
+		const DWORD staff_nation_id = (DWORD)person->StaffNation->NationID;
+		const naturalization_nation_data* staff_policy =
+			staff_nation_id < naturalization_lookup.size() ? &naturalization_lookup[staff_nation_id] : nullptr;
 		// special case for Spain: some countries can gain nationality after 2 years instead of 10
 		if (club_nation_id == NATION_SPAIN_9CF() &&
-			(vector_contains_element(special_spain, (DWORD)person->StaffNation->NationID) ||
-				vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID)))
+			((staff_policy && staff_policy->special_spain) ||
+				(staff_policy && staff_policy->hispanic_american)))
 			min_years = 2;
 		// special case for Portugal: some countries can gain nationality after 7 years instead of 10
 		if (club_nation_id == NATION_PORTUGAL_9CF() &&
-			(vector_contains_element(special_portugal, (DWORD)person->StaffNation->NationID) || person->StaffNation->NationGroupMembership == 2))
+			((staff_policy && staff_policy->special_portugal) || person->StaffNation->NationGroupMembership == 2))
 			min_years = 7;
 		// special case for Mexico: some countries can gain nationality after 2 years instead of 5
 		if (club_nation_id == NATION_MEXICO_9CF() &&
-			(vector_contains_element(special_mexico, (DWORD)person->StaffNation->NationID) ||
-				vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID)))
+			((staff_policy && staff_policy->special_mexico) ||
+				(staff_policy && staff_policy->hispanic_american)))
 			min_years = 2;
 		// special case for Costa Rica: some countries can gain nationality after 5 years instead of 7
-		if (club_nation_id == NATION_COSTA_RICA_9CF() && (vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID) ||
+		if (club_nation_id == NATION_COSTA_RICA_9CF() && ((staff_policy && staff_policy->hispanic_american) ||
 			person->StaffNation->NationID == NATION_SPAIN_9CF()))
 			min_years = 5;
 		// special case for Venezuela: some countries can gain nationality after 5 years instead of 10
-		if (club_nation_id == NATION_VENEZUELA_9CF() && (vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID) ||
-			vector_contains_element(caribbean, (DWORD)person->StaffNation->NationID) ||
+		if (club_nation_id == NATION_VENEZUELA_9CF() && ((staff_policy && staff_policy->hispanic_american) ||
+			(staff_policy && staff_policy->caribbean) ||
 			person->StaffNation->NationID == NATION_SPAIN_9CF() || person->StaffNation->NationID == NATION_PORTUGAL_9CF() ||
 			person->StaffNation->NationID == NATION_ITALY_9CF() || person->StaffNation->NationID == NATION_BRAZIL_9CF()))
 			min_years = 5;
 		// special case for Colombia: some countries can gain nationality after 1 or 2 years instead of 5
 		if (club_nation_id == NATION_COLOMBIA_9CF()) {
-			if (vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID) ||
-				vector_contains_element(caribbean, (DWORD)person->StaffNation->NationID))
+			if ((staff_policy && staff_policy->hispanic_american) ||
+				(staff_policy && staff_policy->caribbean))
 				min_years = 1;
 			if (person->StaffNation->NationID == NATION_SPAIN_9CF())
 				min_years = 2;
 		}
 		// special case for Honduras: some countries can gain nationality after 1 or 2 years instead of 3
 		if (club_nation_id == NATION_HONDURAS_9CF()) {
-			if (vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID) ||
+			if ((staff_policy && staff_policy->hispanic_american) ||
 				person->StaffNation->NationID == NATION_SPAIN_9CF())
 				min_years = 2;
-			if (vector_contains_element(central_america, (DWORD)person->StaffNation->NationID))
+			if (staff_policy && staff_policy->central_america)
 				min_years = 1;
 		}
 		// special case for El Salvador: some countries can gain nationality after 1 year instead of 5
-		if (club_nation_id == NATION_EL_SALVADOR_9CF() && vector_contains_element(hispanic_american, (DWORD)person->StaffNation->NationID))
+		if (club_nation_id == NATION_EL_SALVADOR_9CF() && staff_policy && staff_policy->hispanic_american)
 			min_years = 1;
 		// special case for Nicaragua: some countries can gain nationality after 2 years instead of 4
-		if (club_nation_id == NATION_NICARAGUA_9CF() && (vector_contains_element(central_america, (DWORD)person->StaffNation->NationID) ||
+		if (club_nation_id == NATION_NICARAGUA_9CF() && ((staff_policy && staff_policy->central_america) ||
 			person->StaffNation->NationID == NATION_SPAIN_9CF() || person->StaffNation->NationID == NATION_ARGENTINA_9CF() ||
 			person->StaffNation->NationID == NATION_ITALY_9CF()))
 			min_years = 2;
 		// special case for Jamaica, Trinidad & Tobago, Guyana: some countries can gain nationality after 5 years instead of 7
 		if ((club_nation_id == NATION_JAMAICA_9CF() || club_nation_id == NATION_TRINIDAD_TOBAGO_9CF() || club_nation_id == NATION_GUYANA_9CF()) &&
-			(vector_contains_element(commonwealth, (DWORD)person->StaffNation->NationID) ||
+			((staff_policy && staff_policy->commonwealth) ||
 				person->StaffNation->NationID == NATION_IRELAND_9CF()))
 			min_years = 5;
 		// special case for Malawi, Dominica, Grenada: some countries can gain nationality after 5 years instead of 7
 		if ((club_nation_id == NATION_MALAWI_9CF() || club_nation_id == NATION_DOMINICA_9CF() || club_nation_id == NATION_GRENADA_9CF()) &&
-			vector_contains_element(commonwealth, (DWORD)person->StaffNation->NationID))
+			staff_policy && staff_policy->commonwealth)
 			min_years = 5;
 		// special case for Bahrain: some countries can gain nationality after 10 year instead of 20
-		if (club_nation_id == NATION_BAHRAIN_9CF() && vector_contains_element(arab, (DWORD)person->StaffNation->NationID))
+		if (club_nation_id == NATION_BAHRAIN_9CF() && staff_policy && staff_policy->arab)
 			min_years = 10;
 		// special case for Jordan: some countries can gain nationality after 4 year instead of 15
-		if (club_nation_id == NATION_JORDAN_9CF() && vector_contains_element(arab, (DWORD)person->StaffNation->NationID))
+		if (club_nation_id == NATION_JORDAN_9CF() && staff_policy && staff_policy->arab)
 			min_years = 4;
 		// special case for Austria: some countries can gain nationality after 6 years instead of 10
 		if (club_nation_id == NATION_AUSTRIA_9CF() && person->StaffNation->NationGroupMembership == 2)
@@ -1695,6 +1744,8 @@ void __declspec(naked) fix_hosts_news_function_c()
 
 void setup_misc_functions()
 {
+	initialize_naturalization_lookup();
+
 	// update game name
 	int year = START_YEAR % 2000;
 	char name1[6];
