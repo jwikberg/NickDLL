@@ -1,0 +1,48 @@
+name: Build NickDLL
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.configuration }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build NickDLL
+        run: >-
+          msbuild NickDLL.vcxproj
+          /m
+          /verbosity:minimal
+          /p:Configuration=Release
+          /p:Platform=Win32
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: NickDLL
+          path: Release/NickDLL.dll
+          if-no-files-found: error
